@@ -20,10 +20,8 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     TESTING = True
-    SERVER_NAME = 'localhost.localdomain:5000'
+    SERVER_NAME = 'localhost.localdomain'
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
-    LIST_ENTRIES_PER_PAGE = 10
-    WTF_CSRF_ENABLED = False
 
 
 class ProductionConfig(Config):
