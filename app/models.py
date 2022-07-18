@@ -35,7 +35,6 @@ class Task(db.Model):
             review_span = self.due_date - last_due_date
         new_review_span = review_span * self.multiplier
 
-        print(review_span, new_review_span)
         return date.today() + new_review_span
 
     def tick_off(self):
