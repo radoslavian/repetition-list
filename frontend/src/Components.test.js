@@ -73,12 +73,76 @@ test("check if PreviousReviews renders review history list", () => {
         key => expect(component).toHaveTextContent(row[key])));
 });
 
-/*
-import CurrentTask from "./components/CurrentTask";
+import NewTaskDetails from "./components/NewTaskDetails.js";
+import Button from "react-bootstrap/Button";
 
-test("check if CurrentTask renders", () => {
-    render(<CurrentTask />);
-    const component = screen.getByTestId("currentTask");
-    expect(component).toBeInTheDocument();
+test("check if NewTaskDetails renders itself and children", () => {
+    // how to get child component from the parent using query?
+    render(
+	<NewTaskDetails data-testid="parent">
+          <Button data-testid="child" variant="primary">Primary</Button>
+	</NewTaskDetails>
+    );
+    const parentComponent = screen.getByTestId("parent");
+    const childComponent = screen.getByTestId("child");
+    expect(parentComponent).toBeInTheDocument();
+    expect(childComponent).toBeInTheDocument();
 });
+
+/*
+<Button title="stopSchedulingTaskBt" />
+          <Button title="resetTaskBt" />
 */
+
+import TaskDetails from "./components/TaskDetails.js";
+
+test("check if TaskDetails renders", () => {
+    render(<TaskDetails/>);
+    const stopSchedulingTaskBt = screen.getByTitle("stopSchedulingTaskBt");
+    const resetTaskBt = screen.getByTitle("resetTaskBt");
+    expect(stopSchedulingTaskBt).toBeInTheDocument();
+    expect(resetTaskBt).toBeInTheDocument();
+});
+
+import InactiveTaskDetails from "./components/InactiveTaskDetails.js";
+
+test("check if InactiveTaskDetails renders", () => {
+    render(<InactiveTaskDetails/>);
+    expect(screen.getByTestId("InactiveTaskDetails")).toBeInTheDocument();
+});
+
+import DueTask from "./components/DueTask.js";
+import Table from "react-bootstrap/Table";
+
+test("check if TasksList with a DueTask child renders", () => {
+    render(<Table>
+             <tbody>
+               <DueTask />
+             </tbody>
+           </Table>);
+    expect(screen.getByText("Delete")).toBeInTheDocument();
+});
+
+import UpcomingTask from "./components/UpcomingTask.js";
+
+test("check if UpcomingTask renders as a child of TasksList", () => {
+    render(<Table>
+             <tbody>
+               <UpcomingTask />
+             </tbody>
+           </Table>);
+    expect(screen.getByText(/Previous reviews/)).toBeInTheDocument();
+});
+
+import InactiveTask from "./components/InactiveTask.js";
+
+test("check if InactiveTask renders as a table", () => {
+    render(<Table>
+             <tbody>
+               <InactiveTask />
+             </tbody>
+           </Table>);
+    expect(screen.getByText(
+        "Reintroduce into queue")).toBeInTheDocument();
+    expect(() => screen.getByText("Reset")).toThrow();
+});

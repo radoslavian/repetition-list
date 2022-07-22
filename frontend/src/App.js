@@ -1,5 +1,5 @@
-import AddNewTask from "./components/AddNewTask";
-import PreviousReviews from "./components/PreviousReviews";
+//import AddNewTask from "./components/AddNewTask.js";
+import TasksGroupSwitcher from "./components/TasksGroupSwitcher.js";
 
 export default function App() {
     const rows = [
@@ -10,10 +10,8 @@ export default function App() {
         {date: "10.02.2024",
          multiplier: 1.2}
     ];
+
     return (
-        <>
-          <AddNewTask />
-          <PreviousReviews reviewsData={rows} />
-        </>
+        <TasksGroupSwitcher />
     );
 }
