@@ -12,11 +12,11 @@ import ApiClient from "../ApiClient.js";
 
 function validateTaskData(taskData) {
     if(taskData.title === "") {
-        throw "Empty title";
+        throw new Error("Empty title");
     } else if(isNaN(taskData.multiplier)) {
-        throw "Multiplier is not a number";
+        throw new TypeError("Multiplier is not a number");
     } else if(isNaN(Date.parse(taskData.due_date))) {
-        throw "Due date is not a number";
+        throw new TypeError("Due date is not a number");
     }
 }
 
@@ -45,7 +45,8 @@ export default function AddNewTask({ apiEndpoint }) {
     const defaultMultiplicator = 1.2;
     const [title, updateTitle] = useState("");
     const [description, updateDescription] = useState("");
-    const [intervalMultiplier, updateIntervalMult] = useState(defaultMultiplicator);
+    const [intervalMultiplier, updateIntervalMult] = useState(
+        defaultMultiplicator);
     const [date, updateDate] = useState(today(10));
     const taskData = {title: title,
                       description: description,
