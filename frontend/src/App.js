@@ -1,4 +1,4 @@
-//import AddNewTask from "./components/AddNewTask.js";
+import AddNewTask from "./components/AddNewTask.js";
 import TasksGroupSwitcher from "./components/TasksGroupSwitcher.js";
 
 export default function App() {
@@ -12,6 +12,9 @@ export default function App() {
     ];
 
     return (
-        <TasksGroupSwitcher />
+        <>
+          <AddNewTask />
+          <TasksGroupSwitcher />
+        </>
     );
 }

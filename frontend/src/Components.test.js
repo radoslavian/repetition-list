@@ -11,8 +11,8 @@ test("check TaskTitle component renders", () => {
 
 import EntryTaskDetails from "./components/NewTaskDetails";
 
-test("check NewTaskDetails renders", () => {
-    render(<EntryTaskDetails />);
+test("check if NewTaskDetails renders", () => {
+    render(<EntryTaskDetails testId="NewTaskDetails" />);
     const component = screen.getByTestId("NewTaskDetails");
     expect(component).toBeInTheDocument();
 });
@@ -79,7 +79,7 @@ import Button from "react-bootstrap/Button";
 test("check if NewTaskDetails renders itself and children", () => {
     // how to get child component from the parent using query?
     render(
-	<NewTaskDetails data-testid="parent">
+	<NewTaskDetails testId="parent">
           <Button data-testid="child" variant="primary">Primary</Button>
 	</NewTaskDetails>
     );
@@ -107,7 +107,7 @@ test("check if TaskDetails renders", () => {
 import InactiveTaskDetails from "./components/InactiveTaskDetails.js";
 
 test("check if InactiveTaskDetails renders", () => {
-    render(<InactiveTaskDetails/>);
+    render(<InactiveTaskDetails testId="InactiveTaskDetails" />);
     expect(screen.getByTestId("InactiveTaskDetails")).toBeInTheDocument();
 });
 
@@ -145,4 +145,11 @@ test("check if InactiveTask renders as a table", () => {
     expect(screen.getByText(
         "Reintroduce into queue")).toBeInTheDocument();
     expect(() => screen.getByText("Reset")).toThrow();
+});
+
+import TasksGroupSwitcher from "./components/TasksGroupSwitcher.js";
+
+test("check if TasksGroupSwitcher renders", () => {
+    render(<TasksGroupSwitcher/>);
+    expect(screen.getByText("Inactive reviews")).toBeInTheDocument();
 });

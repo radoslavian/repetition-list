@@ -1,4 +1,5 @@
 from app import db
+from datetime import datetime
 from flask import request, jsonify, abort, make_response
 from ..models import Task, ReviewError
 from . import api_v1
@@ -28,8 +29,14 @@ def index():
 @api_v1.route("/v1/add-task", methods=["POST"])
 def add_task():
     if request.is_json:
+        if request.json.get("due_date"):
+            data = {**request.json,
+                    "due_date": datetime.strptime(
+                        request.json.get("due_date"), '%Y-%m-%d').date()}
+        else:
+            data = request.json
         try:
-            db.session.add(Task(**request.json))
+            db.session.add(Task(**data))
         except TypeError:
             abort(400)
             db.session.rollback()

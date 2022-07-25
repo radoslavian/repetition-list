@@ -25,6 +25,7 @@ class TestApi(unittest.TestCase):
 
         task_data = {"title": "Read a book again",
                      "description": "John Kowolski. Title.",
+                     "due_date": "2022-08-04",
                      "multiplier": 1.8}
         response = self.client.post("/v1/add-task", json=task_data)
 
