@@ -56,6 +56,10 @@ export default class ApiClient {
 	return this.request({method: 'POST', url, body, ...options});
     }
 
+    async patch(url, body, options) {
+	return this.request({method: 'PATCH', url, body, ...options});
+    }
+
     async put(url, body, options) {
 	return this.request({method: 'PUT', url, body, ...options});
     }

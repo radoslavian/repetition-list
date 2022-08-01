@@ -21,6 +21,7 @@ function validateTaskData(taskData) {
 }
 
 function addBtClick(taskData,
+                    endpoint,
                     onSuccess = m => console.log(m),
                     onFail = e => console.error(e)) {
     return async () => {
@@ -31,7 +32,7 @@ function addBtClick(taskData,
             return;
         }
         const apiClient = new ApiClient();
-        const response = await apiClient.post("/add-task", taskData);
+        const response = await apiClient.post(endpoint, taskData);
 
         if(response.ok) {
             onSuccess(response);
@@ -78,9 +79,9 @@ export default function AddNewTask({ apiEndpoint }) {
             <Col>
               <NewTaskDetails
                 descriptionValue={description}
+                intervalMultiplier={intervalMultiplier}
                 onDescChange={handleDescChange}
                 onMultiplierChange={handleMultiplierChange}
-                intervalMultiplier={intervalMultiplier}
               />
             </Col>
             <Col>
@@ -92,7 +93,7 @@ export default function AddNewTask({ apiEndpoint }) {
             <Col>
               <Button
                 variant="info"
-                onClick={addBtClick(taskData, onRequestSuccess)}
+                onClick={addBtClick(taskData, apiEndpoint, onRequestSuccess)}
               >+
               </Button>
             </Col>

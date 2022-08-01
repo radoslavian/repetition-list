@@ -2,32 +2,44 @@ import PreviousReviews from "./PreviousReviews.js";
 import TaskDetails from "./TaskDetails.js";
 import TaskTitle from "./TaskTitle.js";
 import Button from "react-bootstrap/Button";
-import Form from "react-bootstrap/Form";
-import InputGroup from 'react-bootstrap/InputGroup';
+import { useState } from "react";
+import { getOnChange, deleteTask } from "../utils.js";
 
-export default function DueTask(props) {
+export default function DueTask(
+    { value, dueDate, introDate, taskDetails,
+      apiEndpoint = "/v1/task/" }) {
+    const [title, updateTitle] = useState({title: value});
+    const onTitleChange = getOnChange(
+        updateTitle, title, apiEndpoint)("title", taskDetails.id);
+
     return (
         <tr>
           <td>
             <Button>✓</Button>
           </td>
           <td>
-            <TaskTitle />
+            <TaskTitle
+              value={title.title}
+              onChange={onTitleChange}
+            />
           </td>
           <td>
-            <TaskDetails />
+            <TaskDetails taskDetails={taskDetails} />
           </td>
           <td>
-            Due date
+            Due&nbsp;date: {dueDate}
           </td>
           <td>
-            Introduction Date
+            Introduction&nbsp;Date: {introDate}
           </td>
           <td>
             <PreviousReviews />
           </td>
           <td>
-            <Button variant="danger">
+            <Button
+              variant="danger"
+              onClick={() => deleteTask(taskDetails.id, apiEndpoint)}
+            >
               Delete
             </Button>
           </td>

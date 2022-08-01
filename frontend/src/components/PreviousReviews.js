@@ -3,9 +3,9 @@ import Accordion from "react-bootstrap/Accordion";
 
 export default function PreviousReviews({ reviewsData = []}) {
     return (
-        <Accordion>
+        <Accordion defaultActiveKey="0">
           <Accordion.Item>
-            <Accordion.Header>Previous reviews:</Accordion.Header>
+            <Accordion.Header>Reviews:</Accordion.Header>
             <Accordion.Body>
               <Table data-testid="PreviousReviews">
                 <tbody>

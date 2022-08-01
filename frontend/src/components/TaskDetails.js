@@ -1,9 +1,22 @@
 import Button from "react-bootstrap/Button";
 import NewTaskDetails from "./NewTaskDetails.js";
+import { getOnChange } from "../utils.js";
+import { useState } from "react";
 
-export default function TaskDetails() {
+export default function TaskDetails(
+    { taskDetails, apiEndpoint = "/v1/task/" }) {
+    const [details, updateDetails] = useState(taskDetails);
+    const onChange = getOnChange(updateDetails, details, apiEndpoint);
+    const onDescChange = onChange("description", taskDetails.id);
+    const onMultiplierChange = onChange("multiplier", taskDetails.id);
+
     return (
-        <NewTaskDetails>
+        <NewTaskDetails
+          description={details.description}
+          multiplier={details.multiplier}
+          onDescChange={onDescChange}
+          onMultiplierChange={onMultiplierChange}
+        >
           <Button
             variant="primary"
             title="stopSchedulingTaskBt">

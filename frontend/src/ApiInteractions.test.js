@@ -3,7 +3,7 @@ import AddNewTask from "./components/AddNewTask.js";
 import { today } from "./utils.js";
 
 test("test  adding task into database (using the UI)", async () => {
-    render(<AddNewTask />);
+    render(<AddNewTask apiEndpoint="/add-task" />);
     const titleInput = screen.getByPlaceholderText("Task title");
     const detailedDescription = screen.getByPlaceholderText(
         /Detailed description/);
