@@ -7,7 +7,7 @@ import { getOnChange, deleteTask } from "../utils.js";
 
 export default function UpcomingTask(
     { value, dueDate, introDate, taskDetails,
-      apiEndpoint = "/v1/task/" }) {
+      apiEndpoint = "/v1/task/", onDelete = f => f }) {
     const [title, updateTitle] = useState({title: value});
     const onTitleChange = getOnChange(
         updateTitle, title, apiEndpoint)("title", taskDetails.id);
@@ -35,7 +35,8 @@ export default function UpcomingTask(
           <td>
             <Button
               variant="danger"
-              onClick={() => deleteTask(taskDetails.id, apiEndpoint)}
+              onClick={() => deleteTask(taskDetails.id, apiEndpoint,
+                                       onDelete)}
             >
               Delete
             </Button>

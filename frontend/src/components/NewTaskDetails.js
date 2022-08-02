@@ -4,8 +4,8 @@ import TaskDescription from "./TaskDescription";
 import IntervalMultiplier from "./IntervalMultiplier";
 
 export default function NewTaskDetails(
-    { onDescChange, onMultiplierChange, testId, multiplier,
-      description, children }) {
+    { onDescChange, onMultiplierChange, testId, intervalMultiplier,
+      descriptionValue, children }) {
 
     return (
         <Accordion data-testid={testId}>
@@ -14,11 +14,11 @@ export default function NewTaskDetails(
             <Accordion.Body>
               <InputGroup>
                 <TaskDescription
-                  value={description}
+                  value={descriptionValue}
                   onChange={onDescChange}
                 />
                 <IntervalMultiplier
-                  value={multiplier}
+                  value={intervalMultiplier}
                   onChange={onMultiplierChange}
                 />
                 {children}

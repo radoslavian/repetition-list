@@ -20,8 +20,7 @@ function validateTaskData(taskData) {
     }
 }
 
-function addBtClick(taskData,
-                    endpoint,
+function addBtClick(taskData, endpoint,
                     onSuccess = m => console.log(m),
                     onFail = e => console.error(e)) {
     return async () => {
@@ -32,6 +31,7 @@ function addBtClick(taskData,
             return;
         }
         const apiClient = new ApiClient();
+        console.log(taskData);
         const response = await apiClient.post(endpoint, taskData);
 
         if(response.ok) {
@@ -42,7 +42,7 @@ function addBtClick(taskData,
     };
 }
 
-export default function AddNewTask({ apiEndpoint }) {
+export default function AddNewTask({ apiEndpoint, onSuccessAdd = f => f }) {
     const defaultMultiplicator = 1.2;
     const [title, updateTitle] = useState("");
     const [description, updateDescription] = useState("");
@@ -64,9 +64,9 @@ export default function AddNewTask({ apiEndpoint }) {
         updateDescription("");
         updateIntervalMult(defaultMultiplicator);
     };
-    const onRequestSuccess = m => {
+    const onRequestSuccess = () => {
         clearForm();
-        console.log(m);
+        onSuccessAdd();
     };
 
     return (

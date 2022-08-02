@@ -20,7 +20,7 @@ export function today(addDays = 0) {
     return isoDate;
 }
 
-export function deleteTask(taskId, apiEndpoint) {
+export function deleteTask(taskId, apiEndpoint, onSuccess = f => f) {
     const apiClient = new ApiClient(apiEndpoint);
-    apiClient.delete(taskId);
+    apiClient.delete(taskId).then(onSuccess);
 }

@@ -12,8 +12,8 @@ export default function TaskDetails(
 
     return (
         <NewTaskDetails
-          description={details.description}
-          multiplier={details.multiplier}
+          descriptionValue={taskDetails.description}
+          intervalMultiplier={taskDetails.multiplier}
           onDescChange={onDescChange}
           onMultiplierChange={onMultiplierChange}
         >
