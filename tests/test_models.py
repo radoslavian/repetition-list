@@ -96,3 +96,8 @@ class TestApp(unittest.TestCase):
         self.assertEqual(review_data.task_id, task.id)
         self.assertEqual(review_data.task.title, task.title)
         self.assertEqual(review_data.reviewed_on, date.today())
+        task.reviews = []
+        db.session.add(task)
+        db.session.commit()
+        self.assertEqual(Task.query.first().reviews, [])
+        self.assertEqual(ReviewData.query.all(), [])

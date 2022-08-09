@@ -1,30 +1,39 @@
 import Button from "react-bootstrap/Button";
 import NewTaskDetails from "./NewTaskDetails.js";
-import { getOnChange } from "../utils.js";
-import { useState } from "react";
+import { getOnChange, getChangeTaskStatus, getResetTask } from "../utils.js";
+import { useState, useCallback } from "react";
 
 export default function TaskDetails(
-    { taskDetails, apiEndpoint = "/v1/task/" }) {
+    { taskDetails, apiEndpoint = "/v1/task/", toggleUpdate = f => f }) {
     const [details, updateDetails] = useState(taskDetails);
-    const onChange = getOnChange(updateDetails, details, apiEndpoint);
-    const onDescChange = onChange("description", taskDetails.id);
-    const onMultiplierChange = onChange("multiplier", taskDetails.id);
+
+    // Without useCallback, function returned wouldn't
+    // debounce properly (new function instance would be created
+    // on each render).
+    const onChange = useCallback(getOnChange(
+        updateDetails, details, apiEndpoint), []);
+    const changeStatus = getChangeTaskStatus(apiEndpoint, toggleUpdate);
+    const resetTask = getResetTask(apiEndpoint, toggleUpdate);
 
     return (
         <NewTaskDetails
-          descriptionValue={taskDetails.description}
-          intervalMultiplier={taskDetails.multiplier}
-          onDescChange={onDescChange}
-          onMultiplierChange={onMultiplierChange}
+          descriptionValue={details.description}
+          intervalMultiplier={details.multiplier}
+          onDescChange={onChange("description", details.id)}
+          onMultiplierChange={onChange("multiplier", details.id)}
         >
           <Button
             variant="primary"
-            title="stopSchedulingTaskBt">
-            Stop&nbsp;scheduling
+            title="stopSchedulingTaskBt"
+            onClick={() => changeStatus(taskDetails.id)}
+          >
+            {taskDetails.active ? "Stop scheduling" : "Revert to queue" }
           </Button>
           <Button
             variant="warning"
-            title="resetTaskBt">
+            title="resetTaskBt"
+            onClick={() => resetTask(taskDetails.id)}
+          >
             Reset
           </Button>
         </NewTaskDetails>

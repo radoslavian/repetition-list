@@ -98,7 +98,7 @@ def update_task(task_id):
     return make_response({"status": "updated"}, 200)
 
 
-@api_v1.route("/v1/tasks/<int:task_id>/tick-off", methods=["PUT"])
+@api_v1.route("/v1/task/<int:task_id>/tick-off", methods=["PUT"])
 def tick_off(task_id):
     task = Task.query.filter_by(id=task_id).first_or_404()
     try:
@@ -114,11 +114,40 @@ def delete_task(task_id):
     db.session.delete(task)
     db.session.commit()
 
-    return make_response({"status": "deleted"}, 200)
+    return make_response({
+        "taskId": task.id,
+        "status": "deleted"
+    }, 200)
 
 
-@api_v1.route("/v1/tasks/<task_id>/status", methods=["PATCH"])
+@api_v1.route("/v1/task/<int:task_id>/reset", methods=["PATCH"])
+def reset_task(task_id):
+    task = Task.query.filter_by(id=task_id).first_or_404()
+    task.reviews = []
+    db.session.add(task)
+    db.session.commit()
+
+    return make_response({
+        "taskId": task.id,
+        "status": "reset"
+    }, 200)
+
+
+@api_v1.route("/v1/task/<task_id>/reviews", methods=["GET"])
+def get_task_reviews(task_id):
+    task = Task.query.get_or_404(task_id)
+
+    return make_response(jsonify([{
+        "reviewed_on": data_item.reviewed_on,
+        "prev_due_date": data_item.prev_due_date,
+        "multiplier": data_item.multiplier
+    } for data_item in task.reviews]), 200)
+
+
+@api_v1.route("/v1/task/<int:task_id>/status", methods=["PATCH"])
 def change_task_status(task_id):
+    """Toggle task status."""
+
     task = Task.query.filter_by(id=task_id).first_or_404()
     task.active = not task.active
     db.session.add(task)

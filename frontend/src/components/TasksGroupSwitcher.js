@@ -9,9 +9,11 @@ import { useState } from "react";
 export default function TaskGroupSwitcher({ allTasks = [], toggleUpdate }) {
     const [key, setKey] = useState("upcoming");
     const dueTasks = allTasks.filter(
-        task => new Date(task.due_date) <= new Date());
+        task => new Date(task.due_date) <= new Date() && task.active)
+          .reverse();
     const upcomingTasks = allTasks.filter(
-        task => new Date(task.due_date) > new Date()).reverse();
+        task => new Date(task.due_date) > new Date() && task.active)
+          .reverse();
     const inactiveTasks = allTasks.filter(task => !task.active);
 
     return (
@@ -25,16 +27,9 @@ export default function TaskGroupSwitcher({ allTasks = [], toggleUpdate }) {
               <tbody>
                 {dueTasks.map(task => (
                     <DueTask
-                      taskDetails={{
-                          id: task.id,
-                          description: task.description,
-                          multiplier: task.multiplier
-                      }}
+                      taskDetails={task}
                       key={`a${task.id}`}
-                      onDelete={toggleUpdate}
-                      value={task.title}
-                      dueDate={task.due_date}
-                      introDate={task.intro_date}
+                      toggleUpdate={toggleUpdate}
                     />))}
              </tbody>
            </Table>
@@ -44,16 +39,9 @@ export default function TaskGroupSwitcher({ allTasks = [], toggleUpdate }) {
              <tbody>
                {upcomingTasks.map((task, i) => (
                                   <UpcomingTask
-                                    taskDetails={{
-                                        id: task.id,
-                                        description: task.description,
-                                        multiplier: task.multiplier
-                                    }}
+                                    taskDetails={task}
                                     key={`a${task.id}`}
-                                    onDelete={toggleUpdate}
-                                    value={task.title}
-                                    dueDate={task.due_date}
-                                    introDate={task.intro_date}
+                                    toggleUpdate={toggleUpdate}
                                   />))}
              </tbody>
            </Table>
@@ -61,7 +49,12 @@ export default function TaskGroupSwitcher({ allTasks = [], toggleUpdate }) {
           <Tab eventKey="inactive" title="Inactive reviews">
             <Table>
               <tbody>
-                {/*<InactiveTask />*/}
+                {inactiveTasks.map((task, i) => (
+                    <InactiveTask
+                      taskDetails={task}
+                      key={`a${task.id}`}
+                      toggleUpdate={toggleUpdate}
+                    />))}
               </tbody>
             </Table>
           </Tab>

@@ -105,11 +105,11 @@ class TestApi(unittest.TestCase):
         db.session.commit()
 
         for task in due_task_past, todays_task:
-            response = self.client.put(f"/v1/tasks/{task.id}/tick-off")
+            response = self.client.put(f"/v1/task/{task.id}/tick-off")
             self.assertEqual(response.status_code, 200)
 
         for task in future_task, inactive_task:
-            response = self.client.put(f"/v1/tasks/{task.id}/tick-off")
+            response = self.client.put(f"/v1/task/{task.id}/tick-off")
             self.assertEqual(response.status_code, 400)
 
     def test_deleting_task(self):
@@ -151,6 +151,28 @@ class TestApi(unittest.TestCase):
         self.client.patch(url_for("api_v1.change_task_status",
                                   task_id=task.id))
         self.assertTrue(Task.query.first().active)
+
+    def test_reset_task(self):
+        self.test_ticking_off()
+        task = Task.query.all()[0]
+
+        self.assertEqual(len(task.reviews), 1)
+        self.assertEqual(self.client.patch(
+            url_for("api_v1.reset_task",
+                    task_id=task.id)).status_code, 200)
+        self.assertEqual(len(task.reviews), 0)
+
+    def test_getting_reviewdata(self):
+        self.test_ticking_off()
+        task = Task.query.all()[0]
+        response = self.client.get(f"/v1/task/{task.id}/reviews")
+        keys = ["multiplier", "prev_due_date", "reviewed_on"]
+
+        # test if response contains all valid keys
+        self.assertTrue(all(key in response.json[0] for key in keys))
+
+        # test if there's data under the keys
+        self.assertTrue(all(response.json[0].get(key, None) for key in keys))
 
 
 class TestTaskUpdate(unittest.TestCase):

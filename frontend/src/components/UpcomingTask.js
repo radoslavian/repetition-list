@@ -2,41 +2,46 @@ import PreviousReviews from "./PreviousReviews.js";
 import TaskDetails from "./TaskDetails.js";
 import TaskTitle from "./TaskTitle.js";
 import Button from "react-bootstrap/Button";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { getOnChange, deleteTask } from "../utils.js";
 
 export default function UpcomingTask(
-    { value, dueDate, introDate, taskDetails,
-      apiEndpoint = "/v1/task/", onDelete = f => f }) {
-    const [title, updateTitle] = useState({title: value});
-    const onTitleChange = getOnChange(
-        updateTitle, title, apiEndpoint)("title", taskDetails.id);
+    { taskDetails, apiEndpoint = "/v1/task/", toggleUpdate = f => f }) {
+    const [title, updateTitle] = useState({title: taskDetails.title});
+    const onChange = useCallback(getOnChange(
+        updateTitle, title, apiEndpoint), []);
 
     return (
         <tr>
           <td>
             <TaskTitle
               value={title.title}
-              onChange={onTitleChange}
+              onChange={onChange("title", taskDetails.id)}
             />
           </td>
           <td>
-            <TaskDetails taskDetails={taskDetails} />
+            <TaskDetails
+              taskDetails={taskDetails}
+              toggleUpdate={toggleUpdate}
+            />
           </td>
           <td>
-            Due&nbsp;date: {dueDate}
+            Due&nbsp;date: {taskDetails.due_date}
           </td>
           <td>
-            Introduction&nbsp;Date: {introDate}
+            Introduction&nbsp;Date: {taskDetails.intro_date}
           </td>
           <td>
-            <PreviousReviews />
+            <PreviousReviews
+              apiEndpoint={apiEndpoint}
+              taskId={taskDetails.id}
+            />
           </td>
           <td>
             <Button
               variant="danger"
               onClick={() => deleteTask(taskDetails.id, apiEndpoint,
-                                       onDelete)}
+                                       toggleUpdate)}
             >
               Delete
             </Button>

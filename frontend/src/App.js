@@ -8,7 +8,7 @@ export default function App() {
 
     // naive solution
     const [updateTaskList, toggle] = useReducer(
-        updateTaskList => !updateTaskList, true);
+        updateTaskList => !updateTaskList, false);
 
     function getTasks () {
         const apiClient = new ApiClient("/v1");

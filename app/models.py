@@ -43,6 +43,7 @@ class Task(db.Model):
         elif not self.active:
             raise ReviewError("Can't tick-off an inactive task.")
 
+        self.due_date = self.new_due_date()
         self.reviews.append(ReviewData(prev_due_date=self.due_date,
                                        reviewed_on=date.today(),
                                        multiplier=self.multiplier))
@@ -62,4 +63,4 @@ class ReviewData(db.Model):
     multiplier = db.Column(db.Float, nullable=False)
     task = db.relationship("Task",
                            backref=db.backref("reviews",
-                                              cascade="all, delete"))
+                                              cascade="all, delete-orphan"))

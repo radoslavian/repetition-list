@@ -2,20 +2,22 @@ import PreviousReviews from "./PreviousReviews.js";
 import TaskDetails from "./TaskDetails.js";
 import TaskTitle from "./TaskTitle.js";
 import Button from "react-bootstrap/Button";
-import { useState } from "react";
-import { getOnChange, deleteTask } from "../utils.js";
+import { useState, useCallback } from "react";
+import { getOnChange, deleteTask, tickOff } from "../utils.js";
 
 export default function DueTask(
-    { value, dueDate, introDate, taskDetails,
-      apiEndpoint = "/v1/task/", onDelete = f => f }) {
-    const [title, updateTitle] = useState({title: value});
-    const onTitleChange = getOnChange(
-        updateTitle, title, apiEndpoint)("title", taskDetails.id);
+    { taskDetails, toggleUpdate = f => f, apiEndpoint = "/v1/task/" }) {
+    const [title, updateTitle] = useState({title: taskDetails.title});
+    const onChange = useCallback(getOnChange(
+        updateTitle, title, apiEndpoint), []);
+    const onTitleChange = onChange("title", taskDetails.id);
 
     return (
         <tr>
           <td>
-            <Button>✓</Button>
+            <Button onClick={() => tickOff(
+                taskDetails.id, apiEndpoint, toggleUpdate)}
+            >✓</Button>
           </td>
           <td>
             <TaskTitle
@@ -24,22 +26,28 @@ export default function DueTask(
             />
           </td>
           <td>
-            <TaskDetails taskDetails={taskDetails} />
+            <TaskDetails
+              taskDetails={taskDetails}
+              toggleUpdate={toggleUpdate}
+            />
           </td>
           <td>
-            Due&nbsp;date: {dueDate}
+            Due&nbsp;date: {taskDetails.due_date}
           </td>
           <td>
-            Introduction&nbsp;Date: {introDate}
+            Introduction&nbsp;Date: {taskDetails.intro_date}
           </td>
           <td>
-            <PreviousReviews />
+            <PreviousReviews
+              taskId={taskDetails.id}
+              apiEndpoint={apiEndpoint}
+            />
           </td>
           <td>
             <Button
               variant="danger"
               onClick={() => deleteTask(taskDetails.id, apiEndpoint,
-                                        onDelete)}
+                                        toggleUpdate)}
             >
               Delete
             </Button>

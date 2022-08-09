@@ -17,6 +17,9 @@ function validateTaskData(taskData) {
         throw new TypeError("Multiplier is not a number");
     } else if(isNaN(Date.parse(taskData.due_date))) {
         throw new TypeError("Due date is not a number");
+    } else if (new Date(taskData.due_date) < new Date()) {
+        throw new Error("Task can't have assigned due date that is earlier "
+                            + "than the current date.");
     }
 }
 
