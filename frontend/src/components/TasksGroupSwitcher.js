@@ -7,7 +7,7 @@ import Tab from "react-bootstrap/Tab";
 import { useState } from "react";
 
 export default function TaskGroupSwitcher({ allTasks = [], toggleUpdate }) {
-    const [key, setKey] = useState("upcoming");
+    const [key, setKey] = useState("due");
     const dueTasks = allTasks.filter(
         task => new Date(task.due_date) <= new Date() && task.active)
           .reverse();
@@ -38,11 +38,11 @@ export default function TaskGroupSwitcher({ allTasks = [], toggleUpdate }) {
             <Table>
              <tbody>
                {upcomingTasks.map((task, i) => (
-                                  <UpcomingTask
-                                    taskDetails={task}
-                                    key={`a${task.id}`}
-                                    toggleUpdate={toggleUpdate}
-                                  />))}
+                   <UpcomingTask
+                     taskDetails={task}
+                     key={`a${task.id}`}
+                     toggleUpdate={toggleUpdate}
+                   />))}
              </tbody>
            </Table>
           </Tab>

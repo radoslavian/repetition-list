@@ -47,7 +47,7 @@ def add_task():
     return make_response({"status": "Created"}, 201)
 
 
-@api_v1.route("/v1/task/<task_id>", methods=["GET"])
+@api_v1.route("/v1/task/<int:task_id>", methods=["GET"])
 def get_task(task_id):
     task = Task.query.filter_by(id=task_id).first_or_404()
 
@@ -123,9 +123,7 @@ def delete_task(task_id):
 @api_v1.route("/v1/task/<int:task_id>/reset", methods=["PATCH"])
 def reset_task(task_id):
     task = Task.query.filter_by(id=task_id).first_or_404()
-    task.reviews = []
-    db.session.add(task)
-    db.session.commit()
+    task.reset()
 
     return make_response({
         "taskId": task.id,
@@ -133,7 +131,7 @@ def reset_task(task_id):
     }, 200)
 
 
-@api_v1.route("/v1/task/<task_id>/reviews", methods=["GET"])
+@api_v1.route("/v1/task/<int:task_id>/reviews", methods=["GET"])
 def get_task_reviews(task_id):
     task = Task.query.get_or_404(task_id)
 
@@ -146,7 +144,7 @@ def get_task_reviews(task_id):
 
 @api_v1.route("/v1/task/<int:task_id>/status", methods=["PATCH"])
 def change_task_status(task_id):
-    """Toggle task status."""
+    """Toggle task status (active <--> inactive)."""
 
     task = Task.query.filter_by(id=task_id).first_or_404()
     task.active = not task.active
@@ -154,5 +152,5 @@ def change_task_status(task_id):
     db.session.commit()
 
     return make_response(
-        {"status":
-         f"task status changed to active={task.active}"}, 200)
+        {"taskId": task.id,
+         "status": f"task status changed to active={task.active}"}, 200)

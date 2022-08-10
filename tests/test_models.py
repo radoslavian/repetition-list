@@ -101,3 +101,11 @@ class TestApp(unittest.TestCase):
         db.session.commit()
         self.assertEqual(Task.query.first().reviews, [])
         self.assertEqual(ReviewData.query.all(), [])
+
+    def test_task_repr(self):
+        """Tests the __repr__ method of the Task model."""
+
+        db.session.add(Task(title="Review book chapter"))
+        db.session.commit()
+        task = Task.query.first()
+        self.assertEqual(repr(task), "<Review book chapter>")

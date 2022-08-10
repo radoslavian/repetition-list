@@ -1,9 +1,13 @@
 import ApiClient from "./ApiClient";
 import debounce from "lodash/debounce";
 
-export function getOnChange(update, details, apiEndpoint, timeOut = 1000) {
-    /* Returns function for updating input text-fields in TaskDetails
-     * and related components. */
+export function getOnChange(update, apiEndpoint, timeOut = 1000) {
+    /*
+     * Returns function for updating input text-fields in TaskDetails
+     * and related components.
+     * update - function for updating component state
+     * (MUST be created with the useReducer hook)
+     */
 
     const apiClient = new ApiClient(apiEndpoint);
     const patch = debounce((path, _obj) => apiClient.patch(path, _obj),
@@ -11,7 +15,7 @@ export function getOnChange(update, details, apiEndpoint, timeOut = 1000) {
 
     return (key, taskId) => ev => {
         const obj = {[key]: ev.currentTarget.value};
-        update({...details, ...obj});
+        update({...obj});
         patch(`${taskId}/update`, obj);
     };
 }

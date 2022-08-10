@@ -1,17 +1,24 @@
 import Button from "react-bootstrap/Button";
 import NewTaskDetails from "./NewTaskDetails.js";
 import { getOnChange, getChangeTaskStatus, getResetTask } from "../utils.js";
-import { useState, useCallback } from "react";
+import { useCallback, useReducer } from "react";
 
 export default function TaskDetails(
     { taskDetails, apiEndpoint = "/v1/task/", toggleUpdate = f => f }) {
-    const [details, updateDetails] = useState(taskDetails);
+
+    // useReducer memoizes functions
+    const [details, updateDetails] = useReducer(
+        (details, newDetails) => ({...details, ...newDetails}),
+        taskDetails
+    );
 
     // Without useCallback, function returned wouldn't
-    // debounce properly (new function instance would be created
-    // on each render).
+    // debounce properly - new function instance would be created
+    // on each render; with empty dependency array - it is created
+    // only once.
+
     const onChange = useCallback(getOnChange(
-        updateDetails, details, apiEndpoint), []);
+        updateDetails, apiEndpoint), []);
     const changeStatus = getChangeTaskStatus(apiEndpoint, toggleUpdate);
     const resetTask = getResetTask(apiEndpoint, toggleUpdate);
 

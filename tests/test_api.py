@@ -3,7 +3,7 @@ import datetime
 from flask import url_for
 from app.fake import fake_tasks
 from app.models import Task, ReviewData
-from datetime import date
+from datetime import date, timedelta
 from app import create_app, db
 
 
@@ -161,6 +161,9 @@ class TestApi(unittest.TestCase):
             url_for("api_v1.reset_task",
                     task_id=task.id)).status_code, 200)
         self.assertEqual(len(task.reviews), 0)
+        self.assertEqual(task.intro_date, date.today())
+        self.assertEqual(task.due_date, date.today()
+                         + timedelta(days=Task.default_interval))
 
     def test_getting_reviewdata(self):
         self.test_ticking_off()

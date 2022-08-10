@@ -7,6 +7,13 @@ class ReviewError(Exception):
     pass
 
 
+def default_due_date():
+    """Returns default due date (if not specified explicitly)
+    for the Task model due_date field.
+    """
+    return date.today() + timedelta(days=Task.default_interval)
+
+
 class Task(db.Model):
     __tablename__ = "tasks"
     default_interval = 3
@@ -18,8 +25,15 @@ class Task(db.Model):
     description = db.Column(db.Text)
     intro_date = db.Column(db.Date, default=date.today)
     multiplier = db.Column(db.Float, default=lambda: Task.default_multiplier)
-    due_date = db.Column(db.Date, default=lambda: date.today() + timedelta(
-        days=Task.default_interval))
+    due_date = db.Column(db.Date, default=default_due_date)
+
+    def reset(self):
+        self.reviews = []
+        self.intro_date = date.today()
+        self.due_date = default_due_date()
+
+        db.session.add(self)
+        db.session.commit()
 
     def new_due_date(self):
         """Calculates new due date."""
@@ -43,12 +57,17 @@ class Task(db.Model):
         elif not self.active:
             raise ReviewError("Can't tick-off an inactive task.")
 
-        self.due_date = self.new_due_date()
+        due_date = self.new_due_date()
         self.reviews.append(ReviewData(prev_due_date=self.due_date,
                                        reviewed_on=date.today(),
                                        multiplier=self.multiplier))
+        self.due_date = due_date
+
         db.session.add(self)
         db.session.commit()
+
+    def __repr__(self):
+        return "<" + self.title + ">"
 
 
 class ReviewData(db.Model):
