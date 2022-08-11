@@ -5,6 +5,7 @@ export function getOnChange(update, apiEndpoint, timeOut = 1000) {
     /*
      * Returns function for updating input text-fields in TaskDetails
      * and related components.
+     *
      * update - function for updating component state
      * (MUST be created with the useReducer hook)
      */

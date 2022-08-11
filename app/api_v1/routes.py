@@ -81,6 +81,10 @@ def update_task(task_id):
     try:
         if task_query.count() < 1:
             raise ValueError
+
+        # Initially I thought I would reset intro_date from the UI,
+        # it turned out later it is better to do it
+        # on the server
         dates = {
             k: datetime.strptime(request.json[k], '%Y-%m-%d').date()
             for k in filter(lambda key: key in request.json,
