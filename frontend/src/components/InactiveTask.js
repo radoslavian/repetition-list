@@ -2,16 +2,13 @@ import PreviousReviews from "./PreviousReviews.js";
 import TaskDetails from "./TaskDetails.js";
 import TaskTitle from "./TaskTitle.js";
 import Button from "react-bootstrap/Button";
-import { useReducer, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { getOnChange, deleteTask } from "../utils.js";
 
 export default function InactiveTask(
     { introDate, taskDetails, onTickOff,
       toggleUpdate = f => f, apiEndpoint = "/v1/task/" }) {
-    const [title, updateTitle] = useReducer(
-        (title, newTitle) => ({...title, ...newTitle}),
-        {title: taskDetails.title}
-    );
+    const [title, updateTitle] = useState({title: taskDetails.title});
     const onChange = useCallback(getOnChange(
         updateTitle, title, apiEndpoint), []);
 

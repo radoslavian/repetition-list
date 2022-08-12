@@ -2,19 +2,27 @@ import PreviousReviews from "./PreviousReviews.js";
 import TaskDetails from "./TaskDetails.js";
 import TaskTitle from "./TaskTitle.js";
 import Button from "react-bootstrap/Button";
-import { useReducer, useCallback } from "react";
-import { getOnChange, deleteTask } from "../utils.js";
+import { useState, useCallback } from "react";
+import { getOnChange } from "../utils.js";
+import DeleteTaskDialog from "./DeleteTaskDialog.js";
 
 export default function UpcomingTask(
     { taskDetails, apiEndpoint = "/v1/task/", toggleUpdate = f => f }) {
-    const [title, updateTitle] = useReducer(
-        (title, newTitle) => ({...title, ...newTitle}),
-        {title: taskDetails.title}
-    );
+    const [title, updateTitle] = useState({title: taskDetails.title});
     const onChange = useCallback(getOnChange(
         updateTitle, apiEndpoint), []);
+    const [deleteModalShow, setDeleteModalShow] = useState(false);
+    const handleShow = () => setDeleteModalShow(true);
 
     return (
+        <>
+          <DeleteTaskDialog
+            show={deleteModalShow}
+            setShow={setDeleteModalShow}
+            taskDetails={taskDetails}
+            apiEndpoint={apiEndpoint}
+            onSuccess={toggleUpdate}
+          />
         <tr>
           <td>
             <TaskTitle
@@ -43,12 +51,12 @@ export default function UpcomingTask(
           <td>
             <Button
               variant="danger"
-              onClick={() => deleteTask(taskDetails.id, apiEndpoint,
-                                       toggleUpdate)}
+              onClick={handleShow}
             >
               Delete
             </Button>
           </td>
         </tr>
+        </>
     );
 }

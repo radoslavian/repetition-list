@@ -7,7 +7,6 @@ export function getOnChange(update, apiEndpoint, timeOut = 1000) {
      * and related components.
      *
      * update - function for updating component state
-     * (MUST be created with the useReducer hook)
      */
 
     const apiClient = new ApiClient(apiEndpoint);
