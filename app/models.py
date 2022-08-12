@@ -37,6 +37,14 @@ class Task(db.Model):
             raise ValueError("Task multiplier must be > 0.")
         return value
 
+    @validates("title")
+    def validate_title(self, key, value):
+        """Check if title isn't an empty string."""
+
+        if value == "":
+            raise ValueError("Task title can not be an empty string.")
+        return value
+
     def reset(self):
         self.reviews = []
         self.intro_date = date.today()

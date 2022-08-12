@@ -115,3 +115,14 @@ class TestApp(unittest.TestCase):
 
         self.assertRaises(ValueError,
                           lambda: Task(title="task", multiplier=0))
+
+    def test_empty_title(self):
+        """Test if Task title can be changed to an empty string."""
+
+        def raise_error():
+            db.session.add(Task(title="Review book chapter"))
+            db.session.commit()
+            task = Task.query.first()
+            task.title = ""
+
+        self.assertRaises(ValueError, raise_error)

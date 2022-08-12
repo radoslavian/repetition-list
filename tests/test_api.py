@@ -237,6 +237,13 @@ class TestTaskUpdate(unittest.TestCase):
                               "title": "John Novak. Second Title."},
                              dict(response.json))
 
+    def test_empty_title(self):
+        """Test if app allows updating task with an empty title."""
+        response = self.client.patch(
+            f"/v1/task/{self.task.id}/update",
+            json={"title": ""})
+        self.assertEqual(response.status_code, 400)
+
     def test_update_description_multiplier(self):
         self.client.patch(
             f"/v1/task/{self.task.id}/update",
