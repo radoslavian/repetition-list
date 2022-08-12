@@ -11,10 +11,13 @@ def wrong_argument(e):
     # e - error object-depending on circumstances,
     # BadRequest object in this case
 
+    status = (e.description or
+              "Bad Request: The browser (or proxy) sent a request"
+              + " that this server could not perform.")
+
     return make_response(
         {"error": "Bad Request",
-         "status": "Bad Request: The browser (or proxy) sent a request"
-         + " that this server could not perform."}, 400)
+         "status": status}, 400)
 
 
 @api_v1.errorhandler(404)
@@ -38,11 +41,10 @@ def add_task():
             data = request.json
         try:
             db.session.add(Task(**data))
-        except TypeError:
-            abort(400)
-            db.session.rollback()
-        else:
             db.session.commit()
+        except (ValueError, TypeError) as e:
+            db.session.rollback()
+            abort(400, str(e))
 
     return make_response({"status": "Created"}, 201)
 
@@ -76,11 +78,11 @@ def get_tasks():
 @api_v1.route("/v1/task/<int:task_id>/update", methods=["PATCH"])
 def update_task(task_id):
     if not request.is_json or not request.json:
-        abort(400)
+        abort(400, "Request should be in json format.")
     task_query = db.session.query(Task).filter(Task.id == task_id)
     try:
         if task_query.count() < 1:
-            raise ValueError
+            raise ValueError(f"Task with a given id {task_id} was not found.")
 
         # Initially I thought I would reset intro_date from the UI,
         # it turned out later it is better to do it
@@ -91,14 +93,19 @@ def update_task(task_id):
                             {"intro_date", "due_date"})
         }
         task_data = {**request.json, **dates} if dates else request.json
+
+        # multiplier has to be checked by hand - query.update doesn't
+        # run model validators
+        if request.json.get("multiplier", 1.0) < 1.0:
+            raise ValueError("Task multiplier must be > 0.")
         try:
             task_query.update(task_data)
             db.session.commit()
-        except InvalidRequestError:
+        except InvalidRequestError as e:
             db.session.rollback()
-            raise ValueError
-    except ValueError:
-        abort(400)
+            raise ValueError(str(e))
+    except ValueError as e:
+        abort(400, str(e))
     return make_response({"status": "updated"}, 200)
 
 

@@ -21,7 +21,7 @@ class TestApi(unittest.TestCase):
         self.app_context.pop()
 
     def test_add_task(self):
-        """Test adding task into the database."""
+        """Test adding a valid task into the database."""
 
         task_data = {"title": "Read a book again",
                      "description": "John Kowolski. Title.",
@@ -36,6 +36,13 @@ class TestApi(unittest.TestCase):
         task = Task.query.first()
         self.assertEqual(task.title, "Read a book again")
         self.assertEqual(task.multiplier, 1.8)
+
+    def test_add_task_wrong_multiplier(self):
+        """Test if app refuses to add task with incorrect multiplier."""
+        task_data = {"title": "Read a book again",
+                     "multiplier": 0.9}
+        response = self.client.post("/v1/add-task", json=task_data)
+        self.assertEqual(response.status_code, 400)
 
     def test_add_task_bad_request(self):
         """Test server response to the bad request in creating a task."""
@@ -297,3 +304,13 @@ class TestTaskUpdate(unittest.TestCase):
             f"/v1/task/{self.task.id}/update", json=data)
 
         self.assertEqual(response.status_code, 400)
+
+    def test_multiplier(self):
+        """Test if the Task refuses to accept multiplier < 1."""
+
+        data = {"multiplier": .3}
+        response = self.client.patch(
+            f"/v1/task/{self.task.id}/update", json=data)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json.get("status"),
+                         "Task multiplier must be > 0.")

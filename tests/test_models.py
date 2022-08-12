@@ -109,3 +109,9 @@ class TestApp(unittest.TestCase):
         db.session.commit()
         task = Task.query.first()
         self.assertEqual(repr(task), "<Review book chapter>")
+
+    def test_multiplier(self):
+        """Test if the Task model will accept (should not) 0 multiplier."""
+
+        self.assertRaises(ValueError,
+                          lambda: Task(title="task", multiplier=0))

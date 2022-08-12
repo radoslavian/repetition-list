@@ -1,5 +1,6 @@
 from app import db
 from sqlalchemy import desc
+from sqlalchemy.orm import validates
 from datetime import date, timedelta
 
 
@@ -26,6 +27,15 @@ class Task(db.Model):
     intro_date = db.Column(db.Date, default=date.today)
     multiplier = db.Column(db.Float, default=lambda: Task.default_multiplier)
     due_date = db.Column(db.Date, default=default_due_date)
+
+    @validates("multiplier")
+    def validate_multiplier(self, key, value):
+        """Validates if multiplier is > 0. If test passes, validator method
+        must return the multiplier value.
+        """
+        if value < 1.0:
+            raise ValueError("Task multiplier must be > 0.")
+        return value
 
     def reset(self):
         self.reviews = []
