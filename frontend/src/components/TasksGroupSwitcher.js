@@ -1,7 +1,6 @@
 import Table from "react-bootstrap/Table";
 import DueTask from "./DueTask.js";
-import InactiveTask from "./InactiveTask.js";
-import UpcomingTask from "./UpcomingTask.js";
+import Task from "./Task.js";
 import Tabs from "react-bootstrap/Tabs";
 import Tab from "react-bootstrap/Tab";
 import { useState } from "react";
@@ -26,23 +25,25 @@ export default function TaskGroupSwitcher({ allTasks = [], toggleUpdate }) {
             <Table>
               <tbody>
                 {dueTasks.map(task => (
-                    <DueTask
-                      taskDetails={task}
-                      key={`a${task.id}`}
-                      toggleUpdate={toggleUpdate}
-                    />))}
-             </tbody>
-           </Table>
+                    <tr key={`a${task.id}`}>
+                      <DueTask
+                        taskDetails={task}
+                        toggleUpdate={toggleUpdate}
+                      />
+                    </tr>))}
+              </tbody>
+            </Table>
           </Tab>
           <Tab eventKey="upcoming" title="Upcoming reviews">
             <Table>
-             <tbody>
-               {upcomingTasks.map((task, i) => (
-                   <UpcomingTask
-                     taskDetails={task}
-                     key={`a${task.id}`}
-                     toggleUpdate={toggleUpdate}
-                   />))}
+              <tbody>
+                  {upcomingTasks.map((task, i) => (
+                      <tr key={`b${task.id}`}>
+                        <Task
+                          taskDetails={task}
+                          toggleUpdate={toggleUpdate}
+                        />
+                        </tr>))}
              </tbody>
            </Table>
           </Tab>
@@ -50,14 +51,16 @@ export default function TaskGroupSwitcher({ allTasks = [], toggleUpdate }) {
             <Table>
               <tbody>
                 {inactiveTasks.map((task, i) => (
-                    <InactiveTask
-                      taskDetails={task}
-                      key={`a${task.id}`}
-                      toggleUpdate={toggleUpdate}
-                    />))}
+                    <tr>
+                      <Task
+                        taskDetails={task}
+                        key={`c${task.id}`}
+                        toggleUpdate={toggleUpdate}
+                      />
+                    </tr>))}
               </tbody>
             </Table>
           </Tab>
-          </Tabs>
+        </Tabs>
     );
 }

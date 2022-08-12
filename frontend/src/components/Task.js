@@ -6,11 +6,12 @@ import { useState, useCallback } from "react";
 import { getOnChange } from "../utils.js";
 import DeleteTaskDialog from "./DeleteTaskDialog.js";
 
-export default function UpcomingTask(
+export default function Task(
     { taskDetails, apiEndpoint = "/v1/task/", toggleUpdate = f => f }) {
     const [title, updateTitle] = useState({title: taskDetails.title});
     const onChange = useCallback(getOnChange(
         updateTitle, apiEndpoint), []);
+
     const [deleteModalShow, setDeleteModalShow] = useState(false);
     const handleShow = () => setDeleteModalShow(true);
 
@@ -23,7 +24,6 @@ export default function UpcomingTask(
             apiEndpoint={apiEndpoint}
             onSuccess={toggleUpdate}
           />
-        <tr>
           <td>
             <TaskTitle
               value={title.title}
@@ -56,7 +56,6 @@ export default function UpcomingTask(
               Delete
             </Button>
           </td>
-        </tr>
         </>
     );
 }

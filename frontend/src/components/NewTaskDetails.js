@@ -5,7 +5,7 @@ import IntervalMultiplier from "./IntervalMultiplier";
 
 export default function NewTaskDetails(
     { onDescChange, onMultiplierChange, testId, intervalMultiplier,
-      descriptionValue, children }) {
+      descriptionValue = "", children }) {
 
     return (
         <Accordion data-testid={testId}>
