@@ -2,7 +2,6 @@ import ButtonGroup from "react-bootstrap/ButtonGroup";
 import DropdownButton from "react-bootstrap/DropdownButton";
 import Dropdown from "react-bootstrap/Dropdown";
 import NewTaskDetails from "./NewTaskDetails.js";
-import Card from "react-bootstrap/Card";
 import { getOnChange, getChangeTaskStatus, getResetTask } from "../utils.js";
 import { useCallback, useReducer } from "react";
 

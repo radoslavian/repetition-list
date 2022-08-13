@@ -1,5 +1,4 @@
 import Table from "react-bootstrap/Table";
-import Accordion from "react-bootstrap/Accordion";
 import { useState, useEffect } from "react";
 import Collapse from "react-bootstrap/Collapse";
 import Card from "react-bootstrap/Card";

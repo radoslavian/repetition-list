@@ -1,9 +1,7 @@
 import InputGroup from "react-bootstrap/InputGroup";
-import Accordion from "react-bootstrap/Accordion";
 import TaskDescription from "./TaskDescription";
 import IntervalMultiplier from "./IntervalMultiplier";
 import Collapse from "react-bootstrap/Collapse";
-import Button from 'react-bootstrap/Button';
 import Card from "react-bootstrap/Card";
 import { useState } from "react";
 
