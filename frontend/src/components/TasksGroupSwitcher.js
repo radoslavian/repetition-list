@@ -7,7 +7,8 @@ import { useState } from "react";
 
 function renderTasksHeader(header) {
     return tasks => {
-        /* Conditionally returns header for a given tasks list. */
+        /* Conditionally returns header for a given tasks list
+         * (which currently is a table). */
 
         if(tasks.length > 0)
             return header;
