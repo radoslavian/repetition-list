@@ -321,3 +321,10 @@ class TestTaskUpdate(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json.get("status"),
                          "Task multiplier must be > 0.")
+
+    def test_wrong_id(self):
+        """Test response to attempt to update non-existent task."""
+
+        response = self.client.patch(
+            f"/v1/task/{self.task.id+1}/update", json={"title": "new title"})
+        self.assertEqual(response.status_code, 404)

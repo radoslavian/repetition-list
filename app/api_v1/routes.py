@@ -22,11 +22,14 @@ def wrong_argument(e):
 
 @api_v1.errorhandler(404)
 def resource_not_found(e):
-    return make_response({"error": "Not Found"}, 404)
+    status = e.description or "Resource was not found on this server."
+    return make_response({"error": "Not Found",
+                          "status": status}, 404)
 
 
 @api_v1.route("/")
 def index():
+    # will return React SPA in production (or semi-production) ready app
     return {"index": "hello world"}
 
 
@@ -80,10 +83,9 @@ def update_task(task_id):
     if not request.is_json or not request.json:
         abort(400, "Request should be in json format.")
     task_query = db.session.query(Task).filter(Task.id == task_id)
+    if task_query.count() < 1:
+        abort(404, f"Task with a given id: {task_id} was not found.")
     try:
-        if task_query.count() < 1:
-            raise ValueError(f"Task with a given id {task_id} was not found.")
-
         # Initially I thought I would reset intro_date from the UI,
         # it turned out later it is better to do it
         # on the server
