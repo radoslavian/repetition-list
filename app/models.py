@@ -30,18 +30,21 @@ class Task(db.Model):
 
     @validates("multiplier")
     def validate_multiplier(self, key, value):
-        """Validates if multiplier is > 0. If test passes, validator method
+        """Check if multiplier is valid. If the test passes, validator method
         must return the multiplier value.
         """
+        # raises ValueError if value can not be converted to float
+        # for instance - it is an incombatible (non-numerical) string
+        float(value)
         if value < 1.0:
             raise ValueError("Task multiplier must be > 0.")
         return value
 
     @validates("title")
     def validate_title(self, key, value):
-        """Check if title isn't an empty string."""
+        """Check if the title field isn't empty."""
 
-        if value == "":
+        if not value:
             raise ValueError("Task title can not be an empty string.")
         return value
 

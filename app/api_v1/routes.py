@@ -95,11 +95,11 @@ def update_task(task_id):
         task_data = {**request.json, **dates} if dates else request.json
 
         # multiplier, title have to be checked by hand - query.update doesn't
-        # run model validators
+        # run model fields validators
         if request.json.get("multiplier", 1.0) < 1.0:
             raise ValueError("Task multiplier must be > 0.")
         if request.json.get("title", "title") == "":
-            raise ValueError("Cannot set title to an empty string.")
+            raise ValueError("Can not set title to an empty string.")
         try:
             task_query.update(task_data)
             db.session.commit()

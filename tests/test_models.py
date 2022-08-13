@@ -110,11 +110,17 @@ class TestApp(unittest.TestCase):
         task = Task.query.first()
         self.assertEqual(repr(task), "<Review book chapter>")
 
-    def test_multiplier(self):
-        """Test if the Task model will accept (should not) 0 multiplier."""
+    def test_zero_multiplier(self):
+        """Test if the Task model accepts (should not) 0 multiplier."""
 
         self.assertRaises(ValueError,
                           lambda: Task(title="task", multiplier=0))
+
+    def test_non_numerical_multiplier(self):
+        """Test if the Task model accepts non numerical multiplier."""
+
+        self.assertRaises(ValueError,
+                          lambda: Task(title="task", multiplier="a"))
 
     def test_empty_title(self):
         """Test if Task title can be changed to an empty string."""
