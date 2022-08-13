@@ -1,12 +1,13 @@
-import Button from "react-bootstrap/Button";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
+import DropdownButton from "react-bootstrap/DropdownButton";
+import Dropdown from "react-bootstrap/Dropdown";
 import NewTaskDetails from "./NewTaskDetails.js";
+import Card from "react-bootstrap/Card";
 import { getOnChange, getChangeTaskStatus, getResetTask } from "../utils.js";
 import { useCallback, useReducer } from "react";
 
 export default function TaskDetails(
     { taskDetails, apiEndpoint = "/v1/task/", toggleUpdate = f => f }) {
-
-    // useReducer memoizes functions
     const [details, updateDetails] = useReducer(
         (details, newDetails) => ({...details, ...newDetails}),
         taskDetails
@@ -29,20 +30,26 @@ export default function TaskDetails(
           onDescChange={onChange("description", details.id)}
           onMultiplierChange={onChange("multiplier", details.id)}
         >
-          <Button
-            variant="primary"
-            title="stopSchedulingTaskBt"
-            onClick={() => changeStatus(taskDetails.id)}
-          >
-            {taskDetails.active ? "Stop scheduling" : "Revert to queue" }
-          </Button>
-          <Button
-            variant="warning"
-            title="resetTaskBt"
-            onClick={() => resetTask(taskDetails.id)}
-          >
-            Reset
-          </Button>
+          <ButtonGroup vertical>
+            <DropdownButton
+              variant="warning"
+              as={ButtonGroup}
+              title="Options"
+            >
+              <Dropdown.Item
+                eventKey="1"
+                onClick={() => resetTask(taskDetails.id)}
+              >
+                Reset
+              </Dropdown.Item>
+              <Dropdown.Item
+                eventKey="2"
+                onClick={() => changeStatus(taskDetails.id)}
+              >
+                {taskDetails.active ? "Stop scheduling" : "Revert to queue" }
+              </Dropdown.Item>
+            </DropdownButton>
+          </ButtonGroup>
         </NewTaskDetails>
     );
 }

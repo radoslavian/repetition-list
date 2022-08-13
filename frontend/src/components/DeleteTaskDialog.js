@@ -20,7 +20,7 @@ export default function DeleteTaskDialog(
           </Modal.Header>
           <Modal.Body>
             <p>Do you really want to delete task "{taskTitle}"?</p>
-            <h6>All data will be lost!</h6>
+            <h6>All data related to this task  will be lost!</h6>
           </Modal.Body>
           <Modal.Footer>
             <Button

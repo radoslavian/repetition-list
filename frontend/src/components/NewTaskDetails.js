@@ -2,16 +2,28 @@ import InputGroup from "react-bootstrap/InputGroup";
 import Accordion from "react-bootstrap/Accordion";
 import TaskDescription from "./TaskDescription";
 import IntervalMultiplier from "./IntervalMultiplier";
+import Collapse from "react-bootstrap/Collapse";
+import Button from 'react-bootstrap/Button';
+import Card from "react-bootstrap/Card";
+import { useState } from "react";
 
 export default function NewTaskDetails(
     { onDescChange, onMultiplierChange, testId, intervalMultiplier,
       descriptionValue = "", children }) {
+    const [open, setOpen] = useState(false);
 
     return (
-        <Accordion data-testid={testId}>
-          <Accordion.Item eventKey="0">
-            <Accordion.Header>Details&hellip;</Accordion.Header>
-            <Accordion.Body>
+        <>
+          <a
+            href="#"
+            className="link-secondary"
+            onClick={() => setOpen(!open)}
+            aria-expanded={open}
+          >
+            Details&hellip;
+          </a>
+          <Collapse in={open}>
+            <Card.Body>
               <InputGroup>
                 <TaskDescription
                   value={descriptionValue}
@@ -23,8 +35,8 @@ export default function NewTaskDetails(
                 />
                 {children}
               </InputGroup>
-            </Accordion.Body>
-          </Accordion.Item>
-        </Accordion>
+            </Card.Body>
+          </Collapse>
+        </>
     );
 }

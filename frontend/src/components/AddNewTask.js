@@ -74,7 +74,7 @@ export default function AddNewTask({ apiEndpoint, onSuccessAdd = f => f }) {
 
     return (
         <Container fluid data-testid="add-new-task">
-          <h5>Add new task:</h5>
+          <h5 className="mt-2">Add new task:</h5>
           <Row>
             <Col className="pt-2 pr-0">
               <TaskTitle value={title} onChange={handleTitleChange} />

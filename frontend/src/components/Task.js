@@ -5,6 +5,7 @@ import Button from "react-bootstrap/Button";
 import { useState, useCallback } from "react";
 import { getOnChange } from "../utils.js";
 import DeleteTaskDialog from "./DeleteTaskDialog.js";
+import { Trash } from "react-bootstrap-icons";
 
 export default function Task(
     { taskDetails, apiEndpoint = "/v1/task/", toggleUpdate = f => f }) {
@@ -37,10 +38,10 @@ export default function Task(
             />
           </td>
           <td>
-            Due&nbsp;date: {taskDetails.due_date}
+            {taskDetails.due_date}
           </td>
           <td>
-            Introduction&nbsp;Date: {taskDetails.intro_date}
+            {taskDetails.intro_date}
           </td>
           <td>
             <PreviousReviews
@@ -53,7 +54,7 @@ export default function Task(
               variant="danger"
               onClick={handleShow}
             >
-              Delete
+              <Trash/>
             </Button>
           </td>
         </>

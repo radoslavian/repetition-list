@@ -1,6 +1,8 @@
 import Table from "react-bootstrap/Table";
 import Accordion from "react-bootstrap/Accordion";
 import { useState, useEffect } from "react";
+import Collapse from "react-bootstrap/Collapse";
+import Card from "react-bootstrap/Card";
 import ApiClient from "../ApiClient";
 
 export default function PreviousReviews({ taskId, apiEndpoint }) {
@@ -16,27 +18,33 @@ export default function PreviousReviews({ taskId, apiEndpoint }) {
     useEffect(() => loadData(), [open]);
 
     return (
-        <Accordion defaultActiveKey="0">
-          <Accordion.Item>
-            <Accordion.Header onClick={() => setOpen(!open)}>
-            Previous reviews
-          </Accordion.Header>
-            <Accordion.Collapse in={open} dimension="height">
-            <Table data-testid="PreviousReviews">
-              <tbody>
-                <tr><th>Due&nbsp;date:</th><th>Multiplier:</th></tr>
-                {reviewsData.map(
-                    (row, i) => <tr key={`rev-${i}`}>
-                                  <td>
-                                    {new Date(row.prev_due_date)
-                                     .toISOString().split("T")[0]}
-                                  </td>
-                                  <td>{row.multiplier}</td>
-                                </tr>)}
-              </tbody>
-            </Table>
-        </Accordion.Collapse>
-        </Accordion.Item>
-        </Accordion>
+        <>
+          <a
+            className="link-secondary"
+            href="#" onClick={() => setOpen(!open)}
+             aria-expanded={open}
+          >
+            Previous&nbsp;reviews&hellip;
+          </a>
+          <Collapse in={open}>
+            <Card.Body>
+              <Table data-testid="PreviousReviews">
+                <tbody>
+                  <tr><th>Due:</th><th>Multiplier:</th></tr>
+                  {reviewsData.map(
+                      (row, i) => <tr key={`rev-${i}`}>
+                                    <td title="Due date">
+                                      {new Date(row.prev_due_date)
+                                       .toISOString().split("T")[0]}
+                                    </td>
+                                    <td title="Multiplier">
+                                      {row.multiplier}
+                                    </td>
+                                  </tr>)}
+                </tbody>
+              </Table>
+            </Card.Body>
+          </Collapse>
+        </>
     );
 }
