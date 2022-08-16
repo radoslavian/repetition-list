@@ -3,6 +3,7 @@ import DueTask from "./DueTask.js";
 import Task from "./Task.js";
 import Tabs from "react-bootstrap/Tabs";
 import Tab from "react-bootstrap/Tab";
+import Alert from "react-bootstrap/Alert";
 import { useState } from "react";
 
 function renderTasksHeader(header) {
@@ -31,6 +32,8 @@ export default function TaskGroupSwitcher({ allTasks = [], toggleUpdate }) {
         task => new Date(task.due_date) > new Date() && task.active)
           .reverse();
     const inactiveTasks = allTasks.filter(task => !task.active);
+    const [show, showAlert] = useState(false);
+
 
     const dueTasksHeader = renderTasksHeader(
         <tr>
@@ -48,7 +51,23 @@ export default function TaskGroupSwitcher({ allTasks = [], toggleUpdate }) {
         </tr>
     );
 
+    const [errorMsg, setMsg] = useState("");
+
+    function setAlert(msg) {
+        setMsg(msg);
+        showAlert(true);
+    }
+
     return (
+        <>
+          <Alert variant="danger"
+                 show={show}
+                 onClose={() => showAlert(false)}
+                 dismissible
+          >
+            {errorMsg}
+          </Alert>
+
         <Tabs
           id="tasks-group-switcher"
           activeKey={key}
@@ -62,6 +81,7 @@ export default function TaskGroupSwitcher({ allTasks = [], toggleUpdate }) {
                 {dueTasks.map(task => (
                     <tr key={`a${task.id}`}>
                       <DueTask
+                        showAlert={setAlert}
                         taskDetails={task}
                         toggleUpdate={toggleUpdate}
                       />
@@ -76,6 +96,7 @@ export default function TaskGroupSwitcher({ allTasks = [], toggleUpdate }) {
                   {upcomingTasks.map((task, i) => (
                       <tr key={`b${task.id}`}>
                         <Task
+                          showAlert={setAlert}
                           taskDetails={task}
                           toggleUpdate={toggleUpdate}
                         />
@@ -90,6 +111,7 @@ export default function TaskGroupSwitcher({ allTasks = [], toggleUpdate }) {
                 {inactiveTasks.map((task, i) => (
                     <tr key={`c${task.id}`}>
                       <Task
+                        showAlert={setAlert}
                         taskDetails={task}
                         toggleUpdate={toggleUpdate}
                       />
@@ -98,5 +120,6 @@ export default function TaskGroupSwitcher({ allTasks = [], toggleUpdate }) {
             </Table>
           </Tab>
         </Tabs>
+        </>
     );
 }

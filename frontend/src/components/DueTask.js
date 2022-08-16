@@ -10,7 +10,8 @@ import { tickOff } from "../utils.js";
 import Task from "./Task.js";
 
 export default function DueTask(
-    { taskDetails, toggleUpdate = f => f, apiEndpoint = "/v1/task/" }) {
+    { taskDetails, toggleUpdate = f => f, apiEndpoint = "/v1/task/",
+    showAlert}) {
 
     return (
         <>
@@ -23,6 +24,7 @@ export default function DueTask(
             taskDetails={taskDetails}
             toggleUpdate={toggleUpdate}
             apiEndpoint={apiEndpoint}
+            showAlert={showAlert}
           />
         </>
     );

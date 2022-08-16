@@ -8,12 +8,17 @@ import DeleteTaskDialog from "./DeleteTaskDialog.js";
 import { Trash } from "react-bootstrap-icons";
 
 export default function Task(
-    { taskDetails, apiEndpoint = "/v1/task/", toggleUpdate = f => f }) {
+    { taskDetails, showAlert,
+      apiEndpoint = "/v1/task/", toggleUpdate = f => f }) {
     const [title, updateTitle] = useState({title: taskDetails.title});
-    const onChange = useCallback(getOnChange(
-        updateTitle, apiEndpoint), []);
-
+    function onTitleUpdateFail(response) {
+        showAlert(response.body.status);
+    }
+    const onChange = getOnChange(
+        updateTitle, apiEndpoint, onTitleUpdateFail);
+    const onTitleChange = useCallback(onChange("title", taskDetails.id), []);
     const [deleteModalShow, setDeleteModalShow] = useState(false);
+
     const handleShow = () => setDeleteModalShow(true);
 
     return (
@@ -28,7 +33,7 @@ export default function Task(
           <td>
             <TaskTitle
               value={title.title}
-              onChange={onChange("title", taskDetails.id)}
+              onChange={onTitleChange}
             />
           </td>
           <td>
