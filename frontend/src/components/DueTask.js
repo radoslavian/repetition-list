@@ -11,7 +11,7 @@ import Task from "./Task.js";
 
 export default function DueTask(
     { taskDetails, toggleUpdate = f => f, apiEndpoint = "/v1/task/",
-    showAlert}) {
+      showAlert}) {
 
     return (
         <>

@@ -43,6 +43,7 @@ def add_task():
         else:
             data = request.json
         try:
+            print(data)
             db.session.add(Task(**data))
             db.session.commit()
         except (ValueError, TypeError) as e:
@@ -96,11 +97,15 @@ def update_task(task_id):
         }
         task_data = {**request.json, **dates} if dates else request.json
 
+        # remove id so it doesn't get modified in the db
+        if task_data.get("id", None):
+            del task_data["id"]
+
         # multiplier, title have to be checked by hand - query.update doesn't
         # run model fields validators
-        if request.json.get("multiplier", 1.0) < 1.0:
+        if float(task_data.get("multiplier", 1.0)) < 1.0:
             raise ValueError("Task multiplier must be > 0.")
-        if request.json.get("title", "title") == "":
+        if task_data.get("title", "title") == "":
             raise ValueError("Can not set title to an empty string.")
         try:
             task_query.update(task_data)

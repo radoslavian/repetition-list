@@ -3,7 +3,7 @@ import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
-import TaskTitle from "./TaskTitle";
+import Form from "react-bootstrap/Form";
 import NewTaskDetails from "./NewTaskDetails";
 import DueDate from "./DueDate";
 import { useState } from "react";
@@ -34,7 +34,6 @@ function addBtClick(taskData, endpoint,
             return;
         }
         const apiClient = new ApiClient();
-        console.log(taskData);
         const response = await apiClient.post(endpoint, taskData);
 
         if(response.ok) {
@@ -77,7 +76,11 @@ export default function AddNewTask({ apiEndpoint, onSuccessAdd = f => f }) {
           <h5 className="mt-2">Add new task:</h5>
           <Row>
             <Col className="pt-2 pr-0">
-              <TaskTitle value={title} onChange={handleTitleChange} />
+              <Form.Control
+                value={title}
+                placeholder="New task title"
+                onChange={handleTitleChange}
+              />
             </Col>
             <Col>
               <NewTaskDetails

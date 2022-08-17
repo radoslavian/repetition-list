@@ -17,8 +17,10 @@ export default function TaskDetails(
     // on each render; with empty dependency array - it is created
     // only once.
 
-    const onChange = useCallback(getOnChange(
-        updateDetails, apiEndpoint), []);
+    const onChange = getOnChange(updateDetails, apiEndpoint);
+    const onDescChange = useCallback(onChange("description", details.id), []);
+    const onMultiplierChange = useCallback(
+        onChange("multiplier", details.id), []);
     const changeStatus = getChangeTaskStatus(apiEndpoint, toggleUpdate);
     const resetTask = getResetTask(apiEndpoint, toggleUpdate);
 
@@ -26,8 +28,8 @@ export default function TaskDetails(
         <NewTaskDetails
           descriptionValue={details.description}
           intervalMultiplier={details.multiplier}
-          onDescChange={onChange("description", details.id)}
-          onMultiplierChange={onChange("multiplier", details.id)}
+          onDescChange={onDescChange}
+          onMultiplierChange={onMultiplierChange}
         >
           <ButtonGroup vertical>
             <DropdownButton

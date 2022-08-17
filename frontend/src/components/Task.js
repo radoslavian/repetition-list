@@ -32,7 +32,7 @@ export default function Task(
           />
           <td>
             <TaskTitle
-              value={title.title}
+              taskDetails={taskDetails}
               onChange={onTitleChange}
             />
           </td>

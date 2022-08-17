@@ -35,7 +35,7 @@ class Task(db.Model):
         """
         # raises ValueError if value can not be converted to float
         # for instance - it is an incombatible (non-numerical) string
-        float(value)
+        value = float(value)
         if value < 1.0:
             raise ValueError("Task multiplier must be > 0.")
         return value
