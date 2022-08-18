@@ -2,21 +2,12 @@ import PreviousReviews from "./PreviousReviews.js";
 import TaskDetails from "./TaskDetails.js";
 import TaskTitle from "./TaskTitle.js";
 import Button from "react-bootstrap/Button";
-import { useState, useCallback } from "react";
-import { getOnChange } from "../utils.js";
+import { useState } from "react";
 import DeleteTaskDialog from "./DeleteTaskDialog.js";
 import { Trash } from "react-bootstrap-icons";
 
 export default function Task(
-    { taskDetails, showAlert,
-      apiEndpoint = "/v1/task/", toggleUpdate = f => f }) {
-    const [title, updateTitle] = useState({title: taskDetails.title});
-    function onTitleUpdateFail(response) {
-        showAlert(response.body.status);
-    }
-    const onChange = getOnChange(
-        updateTitle, apiEndpoint, onTitleUpdateFail);
-    const onTitleChange = useCallback(onChange("title", taskDetails.id), []);
+    { taskDetails, apiEndpoint = "/v1/task/", toggleUpdate = f => f }) {
     const [deleteModalShow, setDeleteModalShow] = useState(false);
 
     const handleShow = () => setDeleteModalShow(true);
@@ -31,10 +22,7 @@ export default function Task(
             onSuccess={toggleUpdate}
           />
           <td>
-            <TaskTitle
-              taskDetails={taskDetails}
-              onChange={onTitleChange}
-            />
+            <TaskTitle taskDetails={taskDetails}/>
           </td>
           <td>
             <TaskDetails

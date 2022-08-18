@@ -1,10 +1,14 @@
 import AddNewTask from "./components/AddNewTask.js";
 import TasksGroupSwitcher from "./components/TasksGroupSwitcher.js";
-import { useState, useEffect, useReducer } from "react";
+import { useState, useEffect, useReducer, createContext } from "react";
 import ApiClient from "./ApiClient";
+import { useAlert } from "./components/Alert";
+
+export const AlertContext = createContext();
 
 export default function App() {
     const [allTasks, setAllTasks] = useState([]);
+    const [error, warn, info, renderAlerts] = useAlert();
 
     // naive solution
     const [updateTaskList, toggle] = useReducer(
@@ -19,6 +23,8 @@ export default function App() {
 
     return (
         <>
+          { renderAlerts() }
+          <AlertContext.Provider value={[ error, warn, info ]}>
           <AddNewTask
             apiEndpoint="/add-task"
             onSuccessAdd={toggle}
@@ -28,6 +34,7 @@ export default function App() {
             allTasks={allTasks}
             toggleUpdate={toggle}
           />
+        </AlertContext.Provider>
         </>
     );
 }

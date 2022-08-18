@@ -1,6 +1,5 @@
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
-import { useState } from "react";
 
 export default function IntervalMultiplier({ onChange, value }) {
     const _value = parseFloat(value);

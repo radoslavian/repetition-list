@@ -6,7 +6,8 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import NewTaskDetails from "./NewTaskDetails";
 import DueDate from "./DueDate";
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { AlertContext } from "../App";
 import { today } from "../utils.js";
 import ApiClient from "../ApiClient.js";
 
@@ -30,7 +31,7 @@ function addBtClick(taskData, endpoint,
         try {
             validateTaskData(taskData);
         } catch(error) {
-            onFail(error);
+            onFail(error.toString());
             return;
         }
         const apiClient = new ApiClient();
@@ -51,6 +52,7 @@ export default function AddNewTask({ apiEndpoint, onSuccessAdd = f => f }) {
     const [intervalMultiplier, updateIntervalMult] = useState(
         defaultMultiplicator);
     const [date, updateDate] = useState(today(10));
+    const [error, ,info] = useContext(AlertContext);
     const taskData = {title: title,
                       description: description,
                       multiplier: intervalMultiplier,
@@ -69,6 +71,7 @@ export default function AddNewTask({ apiEndpoint, onSuccessAdd = f => f }) {
     const onRequestSuccess = () => {
         clearForm();
         onSuccessAdd();
+        info("Successfully added new task.");
     };
 
     return (
@@ -99,7 +102,9 @@ export default function AddNewTask({ apiEndpoint, onSuccessAdd = f => f }) {
             <Col>
               <Button
                 variant="info"
-                onClick={addBtClick(taskData, apiEndpoint, onRequestSuccess)}
+                onClick={addBtClick(
+                    taskData, apiEndpoint, onRequestSuccess,
+                    e => error(e))}
               >+
               </Button>
             </Col>

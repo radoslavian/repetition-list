@@ -1,30 +1,27 @@
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
 import Button from "react-bootstrap/Button";
-import { useState, useReducer } from "react";
+import { useState, useReducer, useContext } from "react";
+import { AlertContext } from "../App";
 import { Check, X } from "react-bootstrap-icons";
 import ApiClient from "../ApiClient";
 
-async function _save(taskDetails, endpoint, update = f => f, onFail = f => f) {
-    const apiClient = new ApiClient(endpoint);
-    let response = await apiClient
-          .patch(`/${taskDetails.id}/update`, taskDetails);
-    if(!response.ok) {
-        onFail(response);
-        response = await apiClient.get(`/${taskDetails.id}`);
-        update(response.body);
-    }
-}
-
-const _taskDetails = {title: ""};
-
-export default function TaskTitle(
-    { onChange = f => f, taskDetails = _taskDetails, save = _save }) {
-    const [clicked, setClicked] = useReducer(clicked_ => !clicked_);
+export default function TaskTitle({ taskDetails }) {
+    const [clicked, setClicked] = useReducer(_clicked => !_clicked);
     const [title, setTitle] = useState(taskDetails.title);
     const handleTitleChange = e => setTitle(e.currentTarget.value);
-    const cancel = () => setTitle(taskDetails.title);
-    const updateTitle = (data) => setTitle(data.title);
+    const [error] = useContext(AlertContext);
+
+    async function save(details, onFail = f => f, onSuccess = f => f) {
+        const apiClient = new ApiClient("/v1/task");
+        let response = await apiClient
+            .patch(`/${details.id}/update`, details);
+        if(!response.ok) {
+            onFail(response);
+        } else {
+            onSuccess();
+        }
+    }
 
     return (
         clicked || !taskDetails.id ?
@@ -34,17 +31,22 @@ export default function TaskTitle(
             placeholder="Task title"
             onChange={handleTitleChange}
           />
-          <Button variant="outline-info"
-                  onClick={() => {
-                      save({...taskDetails, title: title},
-                           "/v1/task", updateTitle);
-                      setClicked();
-                  }}>
+          <Button
+            variant="outline-info"
+            onClick={
+                () => save({...taskDetails, title: title},
+                           response => {
+                               error(response.body.status);
+                               setTitle(taskDetails.title);
+                           },  // onFail
+                           () => setClicked()  // onSuccess
+                          )
+            }>
             <Check/>
           </Button>
           <Button onClick={() => {
               setClicked();
-              cancel();
+              setTitle(taskDetails.title);
           }}
                   variant="outline-warning">
             <X/>
