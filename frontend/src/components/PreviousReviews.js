@@ -4,12 +4,12 @@ import Collapse from "react-bootstrap/Collapse";
 import Card from "react-bootstrap/Card";
 import ApiClient from "../ApiClient";
 
-export default function PreviousReviews({ taskId, apiEndpoint }) {
+export default function PreviousReviews({ taskId, apiEndpoint, expanded = false }) {
     const [reviewsData, setReviewsData] = useState([]);
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(expanded);
 
     function loadData() {
-        if(!open){ return }
+        if(!open){ return; }
         const apiClient = new ApiClient(apiEndpoint);
         apiClient.get(`/${taskId}/reviews`)
             .then(response => setReviewsData(response.body));

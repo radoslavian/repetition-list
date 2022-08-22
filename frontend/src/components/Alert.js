@@ -1,7 +1,7 @@
 import { default as BSAlert } from "react-bootstrap/Alert";
 import { useState } from "react";
 
-export function Alert({ message, remove, index, variant }) {
+export function Alert({ message, remove, variant }) {
     const [show, setShow] = useState(true);
     const handleClose = () => {
         setShow(false);
@@ -10,7 +10,7 @@ export function Alert({ message, remove, index, variant }) {
         // - with no fade-out effect
         // with timeout set too high, will render again alert that
         // was removed shortly before
-        setTimeout(() => remove(index), 100);
+        setTimeout(() => remove(), 100);
     };
 
     return (
@@ -43,10 +43,9 @@ export function useAlert() {
               key={`Error-${Math.random()*1000}`}
               message={alert.message}
               variant={alert.variant}
-              remove={remove}
-            // array index to be removed from alerts
-              index={i}
+              // array index to be removed from alerts
+              remove={() => remove(i)}
             />));
 
-    return [error, warn, info, renderAlerts];
+    return {error, warn, info, renderAlerts};
 }

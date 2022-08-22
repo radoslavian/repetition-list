@@ -6,7 +6,7 @@ import Card from "react-bootstrap/Card";
 import { useState } from "react";
 
 export default function NewTaskDetails(
-    { onDescChange, onMultiplierChange, testId, intervalMultiplier,
+    { onDescChange, onMultiplierChange, intervalMultiplier,
       descriptionValue = "", children }) {
     const [open, setOpen] = useState(false);
 

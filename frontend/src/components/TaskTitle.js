@@ -2,7 +2,7 @@ import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
 import Button from "react-bootstrap/Button";
 import { useState, useReducer, useContext } from "react";
-import { AlertContext } from "../App";
+import { useAlerts } from "../contexts";
 import { Check, X } from "react-bootstrap-icons";
 import ApiClient from "../ApiClient";
 
@@ -10,7 +10,7 @@ export default function TaskTitle({ taskDetails }) {
     const [clicked, setClicked] = useReducer(_clicked => !_clicked);
     const [title, setTitle] = useState(taskDetails.title);
     const handleTitleChange = e => setTitle(e.currentTarget.value);
-    const [error] = useContext(AlertContext);
+    const { error } = useAlerts();
 
     async function save(details, onFail = f => f, onSuccess = f => f) {
         const apiClient = new ApiClient("/v1/task");

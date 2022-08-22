@@ -6,8 +6,8 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import NewTaskDetails from "./NewTaskDetails";
 import DueDate from "./DueDate";
-import { useState, useContext } from "react";
-import { AlertContext } from "../App";
+import { useState } from "react";
+import { useAlerts } from "../contexts";
 import { today } from "../utils.js";
 import ApiClient from "../ApiClient.js";
 
@@ -52,7 +52,7 @@ export default function AddNewTask({ apiEndpoint, onSuccessAdd = f => f }) {
     const [intervalMultiplier, updateIntervalMult] = useState(
         defaultMultiplicator);
     const [date, updateDate] = useState(today(10));
-    const [error, ,info] = useContext(AlertContext);
+    const { error, info } = useAlerts();
     const taskData = {title: title,
                       description: description,
                       multiplier: intervalMultiplier,
