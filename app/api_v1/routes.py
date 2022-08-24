@@ -43,7 +43,6 @@ def add_task():
         else:
             data = request.json
         try:
-            print(data)
             db.session.add(Task(**data))
             db.session.commit()
         except (ValueError, TypeError) as e:
