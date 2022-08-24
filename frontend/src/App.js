@@ -7,7 +7,7 @@ import { AlertProvider } from "./contexts";
 
 export default function App() {
     const [allTasks, setAllTasks] = useState([]);
-    const { renderAlerts } = useAlerts();
+    const { renderAlerts, error } = useAlerts();
 
     // naive solution
     const [updateTaskList, toggle] = useReducer(
@@ -16,7 +16,21 @@ export default function App() {
     function getTasks () {
         const apiClient = new ApiClient("/v1");
         apiClient.get("/tasks")
-            .then(response => setAllTasks(response.body));
+            .then(response => {
+                if(response.ok) {
+                    setAllTasks(response.body);
+                } else {
+                    switch (response.status) {
+                    case 500:
+                        // cannot be reached when proxied from Node
+                        // check if works when served statically
+                        // from under Flask
+                        error(response.body.message);
+                        break;
+                        // TODO: add other error-cases
+                    }
+                }
+            });
     }
     useEffect(() => getTasks(), [updateTaskList]);
 

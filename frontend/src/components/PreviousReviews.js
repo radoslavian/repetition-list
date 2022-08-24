@@ -11,7 +11,7 @@ export default function PreviousReviews({ taskId, apiEndpoint, expanded = false 
     function loadData() {
         if(!open){ return; }
         const apiClient = new ApiClient(apiEndpoint);
-        apiClient.get(`/${taskId}/reviews`)
+        apiClient.get(`${taskId}/reviews`)
             .then(response => setReviewsData(response.body));
     }
     useEffect(() => loadData(), [open]);

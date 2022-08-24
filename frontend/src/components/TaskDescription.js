@@ -2,7 +2,7 @@ import Form from "react-bootstrap/Form";
 import { useReducer } from "react";
 import Button from "react-bootstrap/Button";
 
-export default function TaskDescription({ onChange, value = "" }) {
+export default function TaskDescription({ onChange = f => f, value = "" }) {
     const [edit, setEdit] = useReducer(edit_ => !edit_, false);
 
     return (

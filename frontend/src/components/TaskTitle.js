@@ -53,7 +53,10 @@ export default function TaskTitle({ taskDetails }) {
           </Button>
         </InputGroup>
         :
-        <p onClick={setClicked}>
+        <p
+          onClick={setClicked}
+          aria-label={title}
+        >
           {title}
         </p>
     );

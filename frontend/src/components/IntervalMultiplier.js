@@ -7,6 +7,7 @@ export default function IntervalMultiplier({ onChange, value }) {
         <InputGroup>
           <Form.Text>Multiplier:&nbsp;<b>{value}</b></Form.Text>
           <Form.Range
+	    aria-label="multiplier"
             min="1.0"
             max="10.0"
             step="0.2"

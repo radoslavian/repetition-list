@@ -11,28 +11,39 @@ test("check if App rendering doesn't run into exceptions", () =>{
     );
 });
 
-/*
+
 import TaskTitle from "./components/TaskTitle";
 
 test("check TaskTitle component renders", () => {
-    render(<TaskTitle />);
-    const component = screen.getByText(/Task title:/);
+    const taskDetails = {
+        due_date: "2022-11-19",
+        id: 1,
+        title: "test title",
+        active: true
+    };
+
+    render(
+        <AlertProvider>
+          <TaskTitle taskDetails={taskDetails}/>
+        </AlertProvider>
+    );
+    const component = screen.getByText("test title");
     expect(component).toBeInTheDocument();
 });
 
-import EntryTaskDetails from "./components/NewTaskDetails";
+import NewTaskDetails from "./components/NewTaskDetails";
 
 test("check if NewTaskDetails renders", () => {
-    render(<EntryTaskDetails testId="NewTaskDetails" />);
-    const component = screen.getByTestId("NewTaskDetails");
-    expect(component).toBeInTheDocument();
+    render(<NewTaskDetails testId="NewTaskDetails" />);
+    expect(screen.getByText("Description...")).toBeInTheDocument();
+    expect(screen.getByText("Multiplier:")).toBeInTheDocument();
 });
 
 import TaskDescription from "./components/TaskDescription";
 
-test("check TaskDescription renders", () => {
+test("check if empty TaskDescription renders", () => {
     render(<TaskDescription />);
-    const component = screen.getByPlaceholderText("Detailed description…");
+    const component = screen.getByText("Description...");
     expect(component).toBeInTheDocument();
 });
 
@@ -47,7 +58,9 @@ test("check IntervalMultiplier renders", () => {
 import AddNewTask from "./components/AddNewTask";
 
 test("check AddNewTask renders", () => {
-    render(<AddNewTask />);
+    render(<AlertProvider>
+             <AddNewTask />
+           </AlertProvider>);
     const component = screen.getByTestId("add-new-task");
     expect(component).toBeInTheDocument();
 });
@@ -59,9 +72,7 @@ test("check DueDate renders", () => {
     const component = screen.getByTitle("dueDate");
     expect(component).toBeInTheDocument();
 });
-*/
 
-import NewTaskDetails from "./components/NewTaskDetails.js";
 import Button from "react-bootstrap/Button";
 
 test("check if NewTaskDetails renders itself and children", () => {

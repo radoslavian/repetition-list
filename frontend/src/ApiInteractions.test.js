@@ -1,9 +1,13 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import AddNewTask from "./components/AddNewTask.js";
 import { today } from "./utils.js";
 import PreviousReviews from "./components/PreviousReviews";
 import ApiClient from "./ApiClient";
 import { AlertProvider } from "./contexts";
+import App from "./App";
+
+// versions higher than @2 have error that results in import failure
+// had to install this specific version with `npm install node-fetch@2`
+import fetchMock from "fetch-mock-jest";
 
 test("if PreviousReviews renders review history list", async () => {
     const rows = [
@@ -23,8 +27,8 @@ test("if PreviousReviews renders review history list", async () => {
         }
     ];
     const response = {body: rows};
-    fetch.mockResponse(JSON.stringify(rows));
-
+    fetchMock.getOnce("http://localhost:3000/v1/task/1/reviews",
+                  JSON.stringify(rows));
     render(<PreviousReviews
              taskId="1" apiEndpoint="/v1/task/" expanded={true} />);
     const component = screen.getByTestId("PreviousReviews");
@@ -44,30 +48,25 @@ test("if PreviousReviews renders review history list", async () => {
     });
 });
 
-test("normal adding task into database (using the UI)", async () => {
+test("displaying task on the tasks list", async () => {
+    const data = [{active: true,
+                   description: "test description",
+                   due_date: today(-2),
+                   id:1,
+                   intro_date: today(-4),
+                   multiplier:1.8,
+                   title:"test title"}];
+    fetchMock.getOnce("http://localhost:3000/v1/tasks",
+                      JSON.stringify(data));
+
+    // since App downloads data from the API, it  has to be rendered after
+    // setting up a fake API endpoint
     render(
         <AlertProvider>
-          <AddNewTask apiEndpoint="/add-task" />
+          <App/>
         </AlertProvider>
     );
-    const titleInput = screen.getByPlaceholderText("New task title");
-    // get description button:
-    const descriptionDetailsBt = screen.getByText("Description...");
-    // click description button:
-    fireEvent.click(descriptionDetailsBt);
-    const detailedDescription = screen.getByPlaceholderText(
-        /Detailed description/);
 
-    // add slider testing
-
-    const dueDateInput = screen.getByTitle("dueDate");
-    const addBt = screen.getByText("+");
-    throw Error("This is where I left last time.");
-    fireEvent.change(titleInput,
-                     {target: {value: "Test Task"}});
-    fireEvent.change(detailedDescription,
-                     {target: {value: "example description"}});
-    fireEvent.change(dueDateInput,
-                     {target: {value: today(10)}});
-    fireEvent.click(addBt);
+    const taskTitle = await screen.findByText("test title");
+    expect(taskTitle).toBeInTheDocument();
 });
