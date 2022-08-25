@@ -45,6 +45,7 @@ export default function Task(
           <td>
             <Button
               variant="danger"
+              aria-label="delete"
               onClick={handleShow}
             >
               <Trash/>
