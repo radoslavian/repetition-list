@@ -1,6 +1,16 @@
 import ApiClient from "./ApiClient";
 import debounce from "lodash/debounce";
 
+export function delay(milliseconds){
+    /*
+      downloaded from:
+      https://alvarotrigo.com/blog/wait-1-second-javascript/
+    */
+    return new Promise(resolve => {
+        setTimeout(resolve, milliseconds);
+    });
+}
+
 export function getOnChange(update, apiEndpoint, fail = f => f,
                             timeOut = 1000) {
     /*
