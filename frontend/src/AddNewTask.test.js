@@ -49,19 +49,17 @@ describe("adding tasks to the database", () => {
             /Detailed description/);
         fireEvent.change(detailedDescription,
                          {target: {value: "example description"}});
+        // selecting a date from a date-picker
         const dueDateInput = screen.getByTitle("dueDate");
         fireEvent.change(dueDateInput,
-                         {target: {value: today(10)}});
-
-        // selecting a date from a date-picker
-        const dueDate = screen.getByTitle("dueDate");
-        fireEvent.change(dueDate, {target: { value:  today(5) }});
+                         {target: {value: "2022-08-29"}});
 
         const addBt = screen.getByText("+");
         fireEvent.click(addBt);
 
         // following used to be within function passed
         // to the fetchMock.postOnce
+        console.log(receivedResponse, expectedResponse);
         expect(_.isEqual(JSON.parse(receivedResponse),
                          JSON.parse(expectedResponse))).toBeTruthy();
     });
