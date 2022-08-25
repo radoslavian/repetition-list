@@ -57,7 +57,9 @@ export default function TaskGroupSwitcher({ allTasks = [], toggleUpdate }) {
           className="mt m-3"
         >
           <Tab eventKey="due" title="Due reviews">
-            <Table>
+            <Table
+              data-testid="tasks-table"
+            >
               <tbody>
                 {dueTasksHeader(dueTasks)}
                 {dueTasks.map(task => (

@@ -26,6 +26,7 @@ export default function Task(
           </td>
           <td>
             <TaskDetails
+              aria-label="task details"
               taskDetails={taskDetails}
               toggleUpdate={toggleUpdate}
             />
