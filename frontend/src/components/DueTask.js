@@ -8,8 +8,10 @@ export default function DueTask(
     return (
         <>
           <td>
-            <Button onClick={() => tickOff(
-                taskDetails.id, apiEndpoint, toggleUpdate)}
+            <Button
+              aria-label="tick off"
+              onClick={() => tickOff(
+                  taskDetails.id, apiEndpoint, toggleUpdate)}
             >✓</Button>
           </td>
           <Task
