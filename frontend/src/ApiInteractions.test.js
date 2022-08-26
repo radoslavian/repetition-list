@@ -16,12 +16,29 @@ import App from "./App";
 
 import fetchMock from "fetch-mock-jest";
 
+function setupServer() {
+    const data = [
+        {
+            active: true,
+            due_date: today(-2),
+            id:1,
+            intro_date: today(-4),
+            multiplier:1.8,
+            title:"test title",
+            "description": "usual task description"
+        }
+    ];
+    fetchMock.get("http://localhost:3000/v1/tasks",
+                  JSON.stringify(data));
+}
+
 test("if PreviousReviews renders review history list", async () => {
     const rows = [
         {
             "multiplier": 1.0, 
             "prev_due_date": "Wed, 15 Aug 2022 00:00:00 GMT", 
-            "reviewed_on": "Wed, 16 Aug 2022 00:00:00 GMT"},
+            "reviewed_on": "Wed, 16 Aug 2022 00:00:00 GMT"
+        },
         {
             "multiplier": 2.0,
             "prev_due_date": "Wed, 16 Aug 2022 00:00:00 GMT", 
@@ -48,7 +65,7 @@ test("if PreviousReviews renders review history list", async () => {
     // but otherwise will be valid (this is why waitFor doesn't work
     // in this case)
     
-    await delay(100);
+    await delay(200);
     const rowsNumber = component.getElementsByTagName("tr").length;
     expect(rowsNumber).toBe(rows.length + 1);  // one for header
 
@@ -60,16 +77,8 @@ test("if PreviousReviews renders review history list", async () => {
 
 describe("tests that require custom setup", () => {
     beforeAll(() => {
-        const data = [{active: true,
-                       description: "test description",
-                       due_date: today(-2),
-                       id:1,
-                       intro_date: today(-4),
-                       multiplier:1.8,
-                       title:"test title"}];
-        fetchMock.get("http://localhost:3000/v1/tasks",
-                      JSON.stringify(data));
-        const okResponse = new Response({taskId: 1, status: 200});
+        setupServer();
+        const okResponse = new Response({taskId: 1, status: 200}, 200);
     });
 
     beforeEach(() => {
@@ -143,6 +152,96 @@ describe("tests that require custom setup", () => {
         // (previous reviews removed and dates changed)
         expect(resetDone).toBeTruthy();
     });
+});
 
-    test("");
+describe("task updates", () => {
+    beforeAll(() => {
+        setupServer();
+        function serverResponse(url, request) {
+            const title = JSON.parse(request.body).title;
+            if (title === "") {
+                console.log("empty title");
+                return {
+                    status: 400,
+                    body: { status: "Can not set title to an empty string." }
+                };
+            }
+            return JSON.stringify({
+                status: 200,
+                body: { status: "updated" }
+            });
+        }
+
+        fetchMock.patch("http://localhost:3000/v1/task/1/update",
+                        serverResponse);
+    });
+
+    beforeEach(() => {
+        // since App downloads data from the API, it  has to be rendered after
+        // setting up a fake API endpoint
+        render(
+            <AlertProvider>
+              <App/>
+            </AlertProvider>
+        );
+    });
+
+    afterAll(() => {
+        fetchMock.restore();
+        fetchMock.reset();
+    });
+
+    test("modifying task description", async () => {
+        const editButton = await screen.findByText("Edit");
+        expect(editButton).toBeInTheDocument();
+        fireEvent.click(editButton);
+        const descriptbionEdit = await screen.findByText(
+            "usual task description");
+        expect(descriptbionEdit).toBeInTheDocument();
+        fireEvent.change(descriptbionEdit,
+                         {target: {value: "New, updated description"}});
+        fireEvent.blur(descriptbionEdit);
+        expect(screen.getByText("New, updated description"))
+            .toBeInTheDocument();
+
+        // update delay
+        await delay(1000);
+        // expect last server response to a patch request
+        const lastOptions = fetchMock.lastOptions(
+            'http://localhost:3000/v1/task/1/update');
+        console.log(lastOptions);
+        const expectedBody = '{"description":"New, updated description"}';
+        expect(lastOptions.body === expectedBody).toBeTruthy();
+    });
+
+    test("updating task title", async () => {
+        // click on title displayed on a task-list
+        fireEvent.click(await screen.findByText("test title"));
+        fireEvent.change(screen.getByTestId("title-input"),
+                         {target: {value: "Updated title"}});
+        fireEvent.click(screen.getByTitle("save title"));  // save button
+
+        const updatedTitle = await screen.findByText("Updated title");
+        expect(fetchMock.done()).toBeTruthy();
+        expect(updatedTitle).toBeInTheDocument();
+    });
+
+    test("attempt to clear the task title", async () => {
+        fireEvent.click(await screen.findByText("test title"));
+        fireEvent.change(screen.getByTestId("title-input"),
+                         {target: {value: ""}});
+        fireEvent.click(screen.getByTitle("save title"));
+
+        const message = await screen
+              .findByText("Can not set title to an empty string.");
+         expect(message).toBeInTheDocument();
+    });
+
+    test("cancelling attempt to change task title", async () => {
+        fireEvent.click(await screen.findByText("test title"));
+        fireEvent.change(screen.getByTestId("title-input"),
+                         {target: {value: ""}});
+        fireEvent.click(screen.getByTitle("cancel modifications"));
+        expect(screen.getByText("test title")).toBeInTheDocument();
+    });
 });

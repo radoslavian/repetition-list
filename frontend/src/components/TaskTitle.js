@@ -46,7 +46,9 @@ export default function TaskTitle({ taskDetails }) {
             }>
             <Check/>
           </Button>
-          <Button onClick={() => {
+          <Button
+            title="cancel modifications"
+            onClick={() => {
               setClicked();
               setTitle(taskDetails.title);
           }}
