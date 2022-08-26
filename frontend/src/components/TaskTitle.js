@@ -27,12 +27,14 @@ export default function TaskTitle({ taskDetails }) {
         clicked || !taskDetails.id ?
         <InputGroup>
           <Form.Control
+            data-testid="title-input"
             value={title}
             placeholder="Task title"
             onChange={handleTitleChange}
           />
           <Button
             variant="outline-info"
+            title="save title"
             onClick={
                 () => save({...taskDetails, title: title},
                            response => {
