@@ -2,13 +2,15 @@ import { render,
          screen,
          fireEvent,
          waitFor,
-         waitForElementToBeRemoved } from "@testing-library/react";
+         waitForElementToBeRemoved,
+       waitForNextUpdate } from "@testing-library/react";
 import { within } from "@testing-library/dom";
 import { today, delay } from "./utils.js";
 import PreviousReviews from "./components/PreviousReviews";
 import ApiClient from "./ApiClient";
 import { AlertProvider } from "./contexts";
 import App from "./App";
+import { act } from "react-dom/test-utils";
 
 // versions higher than @2 have an error that results in import failure
 // had to install this specific version with `npm install node-fetch@2`
@@ -16,7 +18,7 @@ import App from "./App";
 
 import fetchMock from "fetch-mock-jest";
 
-function setupServer() {
+function setupMockGet(){
     const data = [
         {
             active: true,
@@ -53,21 +55,23 @@ test("if PreviousReviews renders review history list", async () => {
     const response = {body: rows};
     fetchMock.get("http://localhost:3000/v1/task/1/reviews",
                   JSON.stringify(rows));
-    render(<PreviousReviews
-             taskId="1" apiEndpoint="/v1/task/" expanded={true} />);
-    const component = screen.getByTestId("PreviousReviews");
-
+    // this way the "test was not wrapped in act(...)" message
+    // no longer appears
+    waitFor(() => render(<PreviousReviews
+                           taskId="1" apiEndpoint="/v1/task/" expanded={true} />));
+    const component = await screen.findByTestId("PreviousReviews");
     expect(component).toBeInTheDocument();
 
-    // since PreviousReviews uses useEffect to asynchronously fetch content
-    // from the server, flow of execution has to be suspended
-    // otherwise component will have only header after first render
-    // but otherwise will be valid (this is why waitFor doesn't work
-    // in this case)
-    
-    await delay(200);
+    // wait for actual previous due date rows to appear
+    // - otherwise would count <tr>s after appearing
+    // of the header (also wrapped in the <tr>)
+    await waitFor(async () => expect(component)
+                  .toHaveTextContent(
+                      new Date("Wed, 18 Aug 2022 00:00:00 GMT")
+                          .toISOString().split("T")[0]));
+
     const rowsNumber = component.getElementsByTagName("tr").length;
-    expect(rowsNumber).toBe(rows.length + 1);  // one for header
+    expect(rowsNumber).toBe(rows.length + 1);  // one for the header
 
     // check if component has all the due-dates text from the rows
     rows.map(row => expect(component)
@@ -75,20 +79,20 @@ test("if PreviousReviews renders review history list", async () => {
                                 .toISOString().split("T")[0]));
 });
 
-describe("tests that require custom setup", () => {
-    beforeAll(() => {
-        setupServer();
-        const okResponse = new Response({taskId: 1, status: 200}, 200);
-    });
+describe("tests that all require the same mock GET route", () => {
+    beforeAll(() => setupMockGet());
 
-    beforeEach(() => {
+    beforeEach(async () => {
         // since App downloads data from the API, it  has to be rendered after
         // setting up a fake API endpoint
-        render(
+        // await act(...) - in order to wrap up async code and remove
+        // the 'code that causes React state updates
+        // should be wrapped into act(...)' warning message
+        await act(async () => await render(
             <AlertProvider>
               <App/>
             </AlertProvider>
-        );
+        ));
     });
 
     afterAll(() => {
@@ -102,36 +106,28 @@ describe("tests that require custom setup", () => {
     });
 
     test("ticking-off a task", async () => {
-        let tickedOff = false;
-        fetchMock.put("http://localhost:3000/v1/task/1/tick-off",
-                      (url, request) => tickedOff = true);
+        fetchMock.putOnce("http://localhost:3000/v1/task/1/tick-off",
+                          new Response({taskId: 1, status: 200}));
         const tickOffBt = await screen.findByLabelText("tick off");
-
-        expect(tickOffBt).toBeInTheDocument();
-        fireEvent.click(tickOffBt);
-        expect(tickedOff).toBeTruthy();
+        await act(async () => fireEvent.click(tickOffBt));
+        expect(fetchMock.called("http://localhost:3000/v1/task/1/tick-off"))
+            .toBeTruthy();
     });
 
     test("deleting item from a (due) list", async () => {
-        let deleted = false;
         fetchMock.delete("http://localhost:3000/v1/task/1",
-                         () => {
-                             deleted = true;
-                             return okResponse;
-                         });
+                         new Response({taskId: 1, status: 200}));
         const deleteButton = await screen.findByLabelText("delete");
-        expect(deleteButton).toBeInTheDocument();
-        deleteButton.click();
+        await act(async () => deleteButton.click());
         const confirmDeleteBt = await screen.findByText("Delete");
-        expect(confirmDeleteBt).toBeInTheDocument();
         const confirmDeletionDialog = screen.getByText(
             "Confirm deletion of the task:");
-        expect(confirmDeletionDialog).toBeInTheDocument();
-        confirmDeleteBt.click();
-        expect(deleted).toBeTruthy();
+        await act(async () => confirmDeleteBt.click());
+        expect(fetchMock.called("http://localhost:3000/v1/task/1")).toBeTruthy();
     });
 
     test("reseting a task", async () => {
+        throw Error("this is where I ended");
         let resetDone = false;
         fetchMock.patch("http://localhost:3000/v1/task/1/reset",
                         () => {
@@ -156,11 +152,10 @@ describe("tests that require custom setup", () => {
 
 describe("task updates", () => {
     beforeAll(() => {
-        setupServer();
+        setupMockGet();
         function serverResponse(url, request) {
             const title = JSON.parse(request.body).title;
             if (title === "") {
-                console.log("empty title");
                 return {
                     status: 400,
                     body: { status: "Can not set title to an empty string." }
@@ -209,7 +204,6 @@ describe("task updates", () => {
         // expect last server response to a patch request
         const lastOptions = fetchMock.lastOptions(
             'http://localhost:3000/v1/task/1/update');
-        console.log(lastOptions);
         const expectedBody = '{"description":"New, updated description"}';
         expect(lastOptions.body === expectedBody).toBeTruthy();
     });
