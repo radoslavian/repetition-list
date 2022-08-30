@@ -119,12 +119,10 @@ describe("adding tasks to the database", () => {
         // changes default fetchMock get route
 
         fetchMock.post(/http:\/\/.*\/v1\/add\-task/,
-                      // returns mocked server error
+                      // returns mocked server error (500)
                        { throws: Error("server error") },
                       { overwriteRoutes: true });
         const task = new Task();
-        fireEvent.change(task.dueDateInput,
-                         {target: {value: task.dueDate}});
         await act(async () => fireEvent.click(task.addBt));
         expect(screen.getByText("The server is unresponsive"))
             .toBeInTheDocument();
