@@ -1,20 +1,19 @@
 import AddNewTask from "./components/AddNewTask.js";
 import TasksGroupSwitcher from "./components/TasksGroupSwitcher.js";
 import { useState, useEffect, useReducer } from "react";
-import { useAlerts } from "./contexts";
-import ApiClient from "./ApiClient";
+import { useApi, useAlerts } from "./contexts";
 
 export default function App() {
     const [allTasks, setAllTasks] = useState([]);
     const { renderAlerts, error } = useAlerts();
+    const api = useApi();
 
     // naive solution
     const [updateTaskList, toggle] = useReducer(
         updateTaskList => !updateTaskList, false);
 
     function getTasks () {
-        const apiClient = new ApiClient("/v1");
-        apiClient.get("/tasks")
+        api.get("/tasks")
             .then(response => {
                 if(response.ok) {
                     setAllTasks(response.body);
@@ -25,6 +24,8 @@ export default function App() {
                         // check if works when served statically
                         // from under Flask
                         error(response.body.message);
+                        break;
+                    default:
                         break;
                         // TODO: add other error-cases
                     }
@@ -44,7 +45,7 @@ export default function App() {
             tasksEndpoint="/tasks"
             allTasks={allTasks}
             toggleUpdate={toggle}
-          />
+            />
         </>
     );
 }

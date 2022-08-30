@@ -3,7 +3,7 @@ import { render,
          fireEvent } from "@testing-library/react";
 import { today } from "./utils.js";
 import PreviousReviews from "./components/PreviousReviews";
-import { AlertProvider } from "./contexts";
+import { ApiProvider, AlertProvider } from "./contexts";
 import App from "./App";
 import { act } from "react-dom/test-utils";
 import fetchMock from "fetch-mock-jest";
@@ -46,7 +46,9 @@ beforeEach(async () => {
     // setting up a fake API endpoint
     await act(() => render(
         <AlertProvider>
-          <App/>
+          <ApiProvider>
+            <App/>
+          </ApiProvider>
         </AlertProvider>
     ));
 });

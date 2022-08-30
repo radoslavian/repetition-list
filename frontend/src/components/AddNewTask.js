@@ -7,9 +7,8 @@ import Form from "react-bootstrap/Form";
 import NewTaskDetails from "./NewTaskDetails";
 import DueDate from "./DueDate";
 import { useState } from "react";
-import { useAlerts } from "../contexts";
+import { useAlerts, useApi } from "../contexts";
 import { today } from "../utils.js";
-import ApiClient from "../ApiClient.js";
 
 function validateTaskData(taskData) {
     if(taskData.title === "") {
@@ -24,27 +23,6 @@ function validateTaskData(taskData) {
     }
 }
 
-function addBtClick(taskData, endpoint,
-                    onSuccess = m => console.log(m),
-                    onFail = e => console.error(e)) {
-    return async () => {
-        try {
-            validateTaskData(taskData);
-        } catch(error) {
-            onFail(error.toString());
-            return;
-        }
-        const apiClient = new ApiClient();
-        const response = await apiClient.post(endpoint, taskData);
-
-        if(response.ok) {
-            onSuccess(response);
-        } else {
-            onFail(response);
-        }
-    };
-}
-
 export default function AddNewTask({ apiEndpoint, onSuccessAdd = f => f }) {
     const defaultMultiplicator = 1.2;
     const [title, updateTitle] = useState("");
@@ -57,6 +35,7 @@ export default function AddNewTask({ apiEndpoint, onSuccessAdd = f => f }) {
                       description: description,
                       multiplier: intervalMultiplier,
                       due_date: date};
+    const apiClient = useApi();
 
     const handleTitleChange = e => updateTitle(e.currentTarget.value);
     const handleDescChange = e => updateDescription(e.currentTarget.value);
@@ -68,11 +47,32 @@ export default function AddNewTask({ apiEndpoint, onSuccessAdd = f => f }) {
         updateDescription("");
         updateIntervalMult(defaultMultiplicator);
     };
+
     const onRequestSuccess = () => {
         clearForm();
         onSuccessAdd();
         info("Successfully added new task.");
     };
+
+    function addBtClick(taskData,
+                        onSuccess = m => m,
+                        onFail = e => error(e.toString())) {
+        return async () => {
+            try {
+                validateTaskData(taskData);
+            } catch(e) {
+                onFail(e.toString());
+                return;
+            }
+            const response = await apiClient.post(apiEndpoint, taskData);
+
+            if(response.ok) {
+                onSuccess(response);
+            } else {
+                onFail(response.body.message);
+            }
+        };
+    }
 
     return (
         <Container fluid data-testid="add-new-task">
@@ -103,8 +103,7 @@ export default function AddNewTask({ apiEndpoint, onSuccessAdd = f => f }) {
               <Button
                 variant="info"
                 onClick={addBtClick(
-                    taskData, apiEndpoint, onRequestSuccess,
-                    e => error(e))}
+                    taskData, onRequestSuccess)}
               >+
               </Button>
             </Col>

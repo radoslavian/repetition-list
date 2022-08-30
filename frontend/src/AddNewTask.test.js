@@ -4,22 +4,55 @@ import { render,
          fireEvent,
          waitFor,
        } from "@testing-library/react";
-import AddNewTask from "./components/AddNewTask.js";
-import { AlertProvider } from "./contexts";
+import { AlertProvider, ApiProvider } from "./contexts";
 import { today, delay } from "./utils";
 import App from "./App";
 // has .isEqual - deep comparison objects for equality
 import { _ } from "lodash";
 import { act } from "react-dom/test-utils";
 
+class Task {
+    constructor() {
+        this.dueDate = today(2);
+        this.titleInput = screen.getByPlaceholderText("New task title");
+        fireEvent.change(this.titleInput,
+                         {target: {value: "Test Task"}});
+
+        // get description button:
+        this.descriptionDetailsBt = screen.getByText("Description...");
+
+        // click description button:
+        fireEvent.click(this.descriptionDetailsBt);
+        this.detailedDescription = screen.getByPlaceholderText(
+            /Detailed description/);
+        fireEvent.change(this.detailedDescription,
+                         {target: {value: "example description"}});
+
+        // selecting a date from a date-picker
+        this.dueDateInput = screen.getByTitle("dueDate");
+        this.expectedResponse = '{"title":"Test Task",'
+            +'"description":"example description"'
+            +`,"multiplier":1.2,"due_date":"${this.dueDate}"}`;
+
+        this.addBt = screen.getByText("+");
+    }
+}
+
 describe("adding tasks to the database", () => {
     beforeAll(() => {
 	const okResponse = new Response({taskId: 1, status: 200});
 	fetchMock
             .postOnce(
-		"http://localhost:3000/v1/add-task",
-		okResponse)
-            .get("*", []);
+		/http:\/\/.*\/v1\/add\-task/, okResponse)
+            .get(/http:\/\/.*\/v1\/tasks/, JSON.stringify([{
+                "active": true, 
+                "description": "Task Description",
+                "due_date": today(2), 
+                "id": 12, 
+                "intro_date": today(),
+                "multiplier": 1.2, 
+                "title": "Test Task"
+            }]));
     });
 
     afterAll(() => {
@@ -30,45 +63,29 @@ describe("adding tasks to the database", () => {
     beforeEach(async () => {
         await act(() => render(
             <AlertProvider>
-              <App/>
+              <ApiProvider>
+                <App/>
+              </ApiProvider>
             </AlertProvider>
         ));
     });
 
     test("normal adding task into database (using the UI)", async () => {
-        const dueDate = today(2);
+        const task = new Task();
         // later add multiplier slider testing
-        const expectedResponse = '{"title":"Test Task",'
-            +'"description":"example description"'
-            +`,"multiplier":1.2,"due_date":"${dueDate}"}`;
+        fireEvent.change(task.dueDateInput,
+                         {target: {value: task.dueDate}});
+        await act(async () => fireEvent.click(task.addBt));
 
-        const titleInput = screen.getByPlaceholderText("New task title");
-        fireEvent.change(titleInput,
-                         {target: {value: "Test Task"}});
-        // get description button:
-        const descriptionDetailsBt = screen.getByText("Description...");
-        // click description button:
-        fireEvent.click(descriptionDetailsBt);
-        const detailedDescription = screen.getByPlaceholderText(
-            /Detailed description/);
-        fireEvent.change(detailedDescription,
-                         {target: {value: "example description"}});
-        // selecting a date from a date-picker
-        const dueDateInput = screen.getByTitle("dueDate");
-        fireEvent.change(dueDateInput,
-                         {target: {value: dueDate}});
-
-        const addBt = screen.getByText("+");
-        await act(async () => fireEvent.click(addBt));
-
-        // following used to be within function passed
-        // to the fetchMock.postOnce
+        expect(await screen.findByText("Test Task"))
+            .toBeInTheDocument();
         expect(fetchMock.called("http://localhost:3000/v1/add-task"))
             .toBeTruthy();
+
         const receivedResponse = fetchMock.lastCall(
             "http://localhost:3000/v1/add-task")[1].body;
         expect(_.isEqual(JSON.parse(receivedResponse),
-                         JSON.parse(expectedResponse))).toBeTruthy();
+                         JSON.parse(task.expectedResponse))).toBeTruthy();
     });
 
     test("attempt to add empty title to a new task", () => {
@@ -95,6 +112,22 @@ describe("adding tasks to the database", () => {
                  "Error: Task can't have assigned due "
                      + "date that is earlier than the current date."))
                  .toBeInTheDocument();
+         });
+
+    test("failure to add new task", async () => {
+        // has to come after all others, since
+        // changes default fetchMock get route
+
+        fetchMock.post(/http:\/\/.*\/v1\/add\-task/,
+                      // returns mocked server error
+                       { throws: Error("server error") },
+                      { overwriteRoutes: true });
+        const task = new Task();
+        fireEvent.change(task.dueDateInput,
+                         {target: {value: task.dueDate}});
+        await act(async () => fireEvent.click(task.addBt));
+        expect(screen.getByText("The server is unresponsive"))
+            .toBeInTheDocument();
     });
 });
 

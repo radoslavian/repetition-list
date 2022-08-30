@@ -4,7 +4,7 @@ import { render,
          waitFor,
          waitForElementToBeRemoved } from "@testing-library/react";
 import { today } from "./utils.js";
-import { AlertProvider } from "./contexts";
+import { AlertProvider, ApiProvider } from "./contexts";
 import App from "./App";
 import { act } from "react-dom/test-utils";
 
@@ -41,7 +41,9 @@ beforeAll(() => {
 beforeEach(async () => {
     await act(() => render(
         <AlertProvider>
-          <App/>
+          <ApiProvider>
+            <App/>
+          </ApiProvider>
         </AlertProvider>
     ));
 });

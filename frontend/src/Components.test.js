@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import { AlertProvider } from "./contexts";
+import { ApiProvider, AlertProvider } from "./contexts";
 import App from "./App";
 import PreviousReviews from "./components/PreviousReviews";
 import fetchMock from "fetch-mock-jest";
@@ -56,7 +56,9 @@ test("check if App rendering doesn't run into exceptions", () => {
     // this should be expanded
     render(
         <AlertProvider>
-          <App/>
+          <ApiProvider>
+            <App/>
+          </ApiProvider>
         </AlertProvider>
     );
 });
@@ -109,7 +111,9 @@ import AddNewTask from "./components/AddNewTask";
 
 test("check AddNewTask renders", () => {
     render(<AlertProvider>
-             <AddNewTask />
+             <ApiProvider>
+               <AddNewTask />
+             </ApiProvider>
            </AlertProvider>);
     const component = screen.getByTestId("add-new-task");
     expect(component).toBeInTheDocument();
