@@ -12,21 +12,21 @@ import App from "./App";
 import { _ } from "lodash";
 import { act } from "react-dom/test-utils";
 
-beforeAll(() => {
-    const okResponse = new Response({taskId: 1, status: 200});
-    fetchMock
-        .postOnce(
-            "http://localhost:3000/v1/add-task",
-            okResponse)
-        .get("*", []);
-});
-
-afterAll(() => {
-    fetchMock.restore();
-    fetchMock.reset();
-});
-
 describe("adding tasks to the database", () => {
+    beforeAll(() => {
+	const okResponse = new Response({taskId: 1, status: 200});
+	fetchMock
+            .postOnce(
+		"http://localhost:3000/v1/add-task",
+		okResponse)
+            .get("*", []);
+    });
+
+    afterAll(() => {
+	fetchMock.restore();
+	fetchMock.reset();
+    });
+
     beforeEach(async () => {
         await act(() => render(
             <AlertProvider>

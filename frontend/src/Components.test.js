@@ -23,8 +23,11 @@ test("if PreviousReviews renders review history list", async () => {
         }
     ];
     const response = {body: rows};
-    fetchMock.get("http://localhost:3000/v1/task/1/reviews",
-                  JSON.stringify(rows));
+    fetchMock
+        .get("http://localhost:3000/v1/task/1/reviews",
+             JSON.stringify(rows))
+        .get("http://localhost:3000/v1/tasks",
+             JSON.stringify([]));
     // this way the "test was not wrapped in act(...)" message
     // no longer appears
     waitFor(() => render(<PreviousReviews
@@ -79,9 +82,10 @@ test("check TaskTitle component renders", () => {
 });
 
 import NewTaskDetails from "./components/NewTaskDetails";
+import { useState } from "react";
 
 test("check if NewTaskDetails renders", () => {
-    render(<NewTaskDetails testId="NewTaskDetails" />);
+    render(<NewTaskDetails />);
     expect(screen.getByText("Description...")).toBeInTheDocument();
     expect(screen.getByText("Multiplier:")).toBeInTheDocument();
 });
