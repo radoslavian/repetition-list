@@ -22,12 +22,9 @@ test("if PreviousReviews renders review history list", async () => {
             "reviewed_on": "Wed, 19 Aug 2022 00:00:00 GMT"
         }
     ];
-    const response = {body: rows};
-    fetchMock
-        .get("http://localhost:3000/v1/task/1/reviews",
-             JSON.stringify(rows))
-        .get("http://localhost:3000/v1/tasks",
-             JSON.stringify([]));
+    fetchMock.get("http://localhost:3000/v1/task/1/reviews",
+                  JSON.stringify(rows));
+
     // this way the "test was not wrapped in act(...)" message
     // no longer appears
     waitFor(() => render(<PreviousReviews
@@ -51,6 +48,8 @@ test("if PreviousReviews renders review history list", async () => {
     rows.map(row => expect(component)
              .toHaveTextContent(new Date(row.prev_due_date)
                                 .toISOString().split("T")[0]));
+    fetchMock.restore();
+    fetchMock.reset();
 });
 
 test("check if App rendering doesn't run into exceptions", () => {
