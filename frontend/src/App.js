@@ -3,7 +3,6 @@ import TasksGroupSwitcher from "./components/TasksGroupSwitcher.js";
 import { useState, useEffect, useReducer } from "react";
 import { useAlerts } from "./contexts";
 import ApiClient from "./ApiClient";
-import { AlertProvider } from "./contexts";
 
 export default function App() {
     const [allTasks, setAllTasks] = useState([]);

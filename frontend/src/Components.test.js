@@ -1,8 +1,56 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { AlertProvider } from "./contexts";
 import App from "./App";
+import PreviousReviews from "./components/PreviousReviews";
+import fetchMock from "fetch-mock-jest";
 
-test("check if App rendering doesn't run into exceptions", () =>{
+test("if PreviousReviews renders review history list", async () => {
+    const rows = [
+        {
+            "multiplier": 1.0, 
+            "prev_due_date": "Wed, 15 Aug 2022 00:00:00 GMT", 
+            "reviewed_on": "Wed, 16 Aug 2022 00:00:00 GMT"
+        },
+        {
+            "multiplier": 2.0,
+            "prev_due_date": "Wed, 16 Aug 2022 00:00:00 GMT", 
+            "reviewed_on": "Wed, 17 Aug 2022 00:00:00 GMT"
+        },
+        {
+            "multiplier": 3.0, 
+            "prev_due_date": "Wed, 18 Aug 2022 00:00:00 GMT", 
+            "reviewed_on": "Wed, 19 Aug 2022 00:00:00 GMT"
+        }
+    ];
+    const response = {body: rows};
+    fetchMock.get("http://localhost:3000/v1/task/1/reviews",
+                  JSON.stringify(rows));
+    // this way the "test was not wrapped in act(...)" message
+    // no longer appears
+    waitFor(() => render(<PreviousReviews
+                           taskId="1" apiEndpoint="/v1/task/"
+                           expanded={true} />));
+    const component = await screen.findByTestId("PreviousReviews");
+    expect(component).toBeInTheDocument();
+
+    // wait for actual previous due date rows to appear
+    // - otherwise would count <tr>s after appearing
+    // of the header (also wrapped in the <tr>)
+    await waitFor(async () => expect(component)
+                  .toHaveTextContent(
+                      new Date("Wed, 18 Aug 2022 00:00:00 GMT")
+                          .toISOString().split("T")[0]));
+
+    const rowsNumber = component.getElementsByTagName("tr").length;
+    expect(rowsNumber).toBe(rows.length + 1);  // one for the header
+
+    // check if component has all the due-dates text from the rows
+    rows.map(row => expect(component)
+             .toHaveTextContent(new Date(row.prev_due_date)
+                                .toISOString().split("T")[0]));
+});
+
+test("check if App rendering doesn't run into exceptions", () => {
     // this should be expanded
     render(
         <AlertProvider>
@@ -10,7 +58,6 @@ test("check if App rendering doesn't run into exceptions", () =>{
         </AlertProvider>
     );
 });
-
 
 import TaskTitle from "./components/TaskTitle";
 

@@ -6,38 +6,42 @@ import { render,
        } from "@testing-library/react";
 import AddNewTask from "./components/AddNewTask.js";
 import { AlertProvider } from "./contexts";
-import { today } from "./utils";
+import { today, delay } from "./utils";
 import App from "./App";
 // has .isEqual - deep comparison objects for equality
 import { _ } from "lodash";
+import { act } from "react-dom/test-utils";
 
-afterEach(() => {
+beforeAll(() => {
+    const okResponse = new Response({taskId: 1, status: 200});
+    fetchMock
+        .postOnce(
+            "http://localhost:3000/v1/add-task",
+            okResponse)
+        .get("*", []);
+});
+
+afterAll(() => {
     fetchMock.restore();
     fetchMock.reset();
 });
 
 describe("adding tasks to the database", () => {
-    beforeEach(() => {
-        render(
+    beforeEach(async () => {
+        await act(() => render(
             <AlertProvider>
               <App/>
             </AlertProvider>
-        );
+        ));
     });
-    test("normal adding task into database (using the UI)", () => {
+
+    test("normal adding task into database (using the UI)", async () => {
+        const dueDate = today(2);
         // later add multiplier slider testing
         const expectedResponse = '{"title":"Test Task",'
             +'"description":"example description"'
-            +',"multiplier":1.2,"due_date":"2022-08-29"}';
+            +`,"multiplier":1.2,"due_date":"${dueDate}"}`;
 
-        // doesn't work otherwise - request.body has to be assigned
-        // to an external object;
-        // placing 'except' within function passed
-        // to postOnce results in test being passed (even though it shouldn't)
-        let receivedResponse;
-        fetchMock.postOnce(
-            "http://localhost:3000/v1/add-task",
-            (url, request) => receivedResponse = request.body);
         const titleInput = screen.getByPlaceholderText("New task title");
         fireEvent.change(titleInput,
                          {target: {value: "Test Task"}});
@@ -52,14 +56,17 @@ describe("adding tasks to the database", () => {
         // selecting a date from a date-picker
         const dueDateInput = screen.getByTitle("dueDate");
         fireEvent.change(dueDateInput,
-                         {target: {value: "2022-08-29"}});
+                         {target: {value: dueDate}});
 
         const addBt = screen.getByText("+");
-        fireEvent.click(addBt);
+        await act(async () => fireEvent.click(addBt));
 
         // following used to be within function passed
         // to the fetchMock.postOnce
-        console.log(receivedResponse, expectedResponse);
+        expect(fetchMock.called("http://localhost:3000/v1/add-task"))
+            .toBeTruthy();
+        const receivedResponse = fetchMock.lastCall(
+            "http://localhost:3000/v1/add-task")[1].body;
         expect(_.isEqual(JSON.parse(receivedResponse),
                          JSON.parse(expectedResponse))).toBeTruthy();
     });
@@ -75,7 +82,7 @@ describe("adding tasks to the database", () => {
     });
 
     test("selecting due date earlier than the date of task adding",
-         () => {
+         async () => {
              const dueDateInput = screen.getByTitle("dueDate");
              let dueDateInRequest;
              fireEvent.change(screen.getByPlaceholderText("New task title"),
