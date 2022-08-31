@@ -2,16 +2,18 @@ import Table from "react-bootstrap/Table";
 import { useState, useEffect } from "react";
 import Collapse from "react-bootstrap/Collapse";
 import Card from "react-bootstrap/Card";
-import ApiClient from "../ApiClient";
+import { useApi } from "../contexts";
 
-export default function PreviousReviews({ taskId, apiEndpoint, expanded = false }) {
+export default function PreviousReviews({ taskId, expanded = false }) {
     const [reviewsData, setReviewsData] = useState([]);
     const [open, setOpen] = useState(expanded);
+    const apiClient = useApi();
 
     function loadData() {
-        if(!open){ return; }
-        const apiClient = new ApiClient(apiEndpoint);
-        apiClient.get(`${taskId}/reviews`)
+        if(!open) {
+            return;
+        }
+        apiClient.get(`/task/${taskId}/reviews`)
             .then(response => setReviewsData(response.body));
     }
     useEffect(() => loadData(), [open]);
