@@ -53,11 +53,6 @@ export function today(addDays = 0) {
     return isoDate;
 }
 
-export function deleteTask(taskId, apiEndpoint, onSuccess = f => f) {
-    const apiClient = new ApiClient(apiEndpoint);
-    apiClient.delete(taskId).then(onSuccess);
-}
-
 export function tickOff(taskId, apiEndpoint, onSuccess = f => f) {
     const apiClient = new ApiClient(apiEndpoint);
     apiClient.put(`${taskId}/tick-off`).then(onSuccess);
