@@ -1,15 +1,18 @@
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
-import { deleteTask } from "../utils.js";
+import { useApi } from "../contexts";
 
 export default function DeleteTaskDialog(
-    { taskDetails, apiEndpoint, onSuccess, show, setShow = f => f }) {
+    { taskDetails, onSuccess, show, setShow = f => f }) {
     const taskTitle = `${taskDetails.title} (id ${taskDetails.id})`;
     const handleClose = () => setShow(false);
     const success = () => {
         onSuccess();
         handleClose();
     };
+    const apiClient = useApi();
+    const handleDelete = () => apiClient
+          .delete(`/task/${taskDetails.id}`).then(success);
 
     return (
         <Modal show={show} onHide={handleClose}>
@@ -31,7 +34,7 @@ export default function DeleteTaskDialog(
             </Button>
             <Button
               variant="danger"
-              onClick={() => deleteTask(taskDetails.id, apiEndpoint, success)}
+              onClick={() => handleDelete(taskDetails.id, success)}
             >
               Delete
             </Button>
