@@ -1,21 +1,21 @@
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
 import Button from "react-bootstrap/Button";
-import { useState, useReducer, useContext } from "react";
+import { useState, useReducer } from "react";
 import { useAlerts } from "../contexts";
 import { Check, X } from "react-bootstrap-icons";
-import ApiClient from "../ApiClient";
+import { useApi } from "../contexts";
 
 export default function TaskTitle({ taskDetails }) {
     const [clicked, setClicked] = useReducer(_clicked => !_clicked);
     const [title, setTitle] = useState(taskDetails.title);
     const handleTitleChange = e => setTitle(e.currentTarget.value);
     const { error } = useAlerts();
+    const apiClient = useApi();
 
     async function save(details, onFail = f => f, onSuccess = f => f) {
-        const apiClient = new ApiClient("/v1/task");
         let response = await apiClient
-            .patch(`/${details.id}/update`, details);
+            .patch(`/task/${details.id}/update`, details);
         if(!response.ok) {
             onFail(response);
         } else {
