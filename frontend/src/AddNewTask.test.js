@@ -109,8 +109,8 @@ describe("adding tasks to the database", () => {
              fireEvent.click(screen.getByText("+"));
 
              expect(screen.getByText(
-                 "Error: Task can't have assigned due "
-                     + "date that is earlier than the current date."))
+                 "Error: Due date has to be set at least "
+                     + "one day from today."))
                  .toBeInTheDocument();
          });
 

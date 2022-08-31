@@ -87,13 +87,16 @@ test("modifying task description", async () => {
     jest.useRealTimers();
 });
 
-test("updating task title", async () => {
+async function updatingTaskTitle() {
     // click on title displayed on a task-list
     fireEvent.click(await screen.findByText("test title"));
     fireEvent.change(screen.getByTestId("title-input"),
                      {target: {value: "Updated title"}});
     fireEvent.click(screen.getByTitle("save title"));  // save button
+}
 
+test("updating task title", async () => {
+    await updatingTaskTitle();
     const updatedTitle = await screen.findByText("Updated title");
     expect(fetchMock.done()).toBeTruthy();
     expect(updatedTitle).toBeInTheDocument();
@@ -116,4 +119,18 @@ test("cancelling attempt to change task title", async () => {
                      {target: {value: ""}});
     fireEvent.click(screen.getByTitle("cancel modifications"));
     expect(screen.getByText("test title")).toBeInTheDocument();
+});
+
+test("changing title, submitting and again cancelling", async () => {
+    /* Test for application logic bug:
+     * Recently, when I modified the title, saved it, clicked it 
+     * again in order to make another modification and then
+     * cancelled, the title got back to the version before the
+     * second modification.
+     */
+    await updatingTaskTitle();
+    const updatedTitle = await screen.findByText("Updated title");
+    fireEvent.click(updatedTitle);
+    fireEvent.click(screen.getByTitle("cancel modifications"));
+    expect(await screen.findByText("Updated title")).toBeInTheDocument();
 });

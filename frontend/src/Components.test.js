@@ -3,6 +3,7 @@ import { ApiProvider, AlertProvider } from "./contexts";
 import App from "./App";
 import PreviousReviews from "./components/PreviousReviews";
 import fetchMock from "fetch-mock-jest";
+import { useApi } from "./contexts";
 
 test("if PreviousReviews renders review history list", async () => {
     const rows = [
@@ -27,9 +28,13 @@ test("if PreviousReviews renders review history list", async () => {
 
     // this way the "test was not wrapped in act(...)" message
     // no longer appears
-    waitFor(() => render(<PreviousReviews
-                           taskId="1" apiEndpoint="/v1/task/"
-                           expanded={true} />));
+    waitFor(() => render(
+        <ApiProvider>
+          <PreviousReviews
+            taskId="1" apiEndpoint="/v1/task/"
+            expanded={true} />
+        </ApiProvider>
+    ));
     const component = await screen.findByTestId("PreviousReviews");
     expect(component).toBeInTheDocument();
 
@@ -75,7 +80,9 @@ test("check TaskTitle component renders", () => {
 
     render(
         <AlertProvider>
-          <TaskTitle taskDetails={taskDetails}/>
+          <ApiProvider>
+            <TaskTitle taskDetails={taskDetails}/>
+          </ApiProvider>
         </AlertProvider>
     );
     const component = screen.getByText("test title");
@@ -83,10 +90,13 @@ test("check TaskTitle component renders", () => {
 });
 
 import NewTaskDetails from "./components/NewTaskDetails";
-import { useState } from "react";
 
 test("check if NewTaskDetails renders", () => {
-    render(<NewTaskDetails />);
+    render(
+        <ApiProvider>
+          <NewTaskDetails />
+        </ApiProvider>
+    );
     expect(screen.getByText("Description...")).toBeInTheDocument();
     expect(screen.getByText("Multiplier:")).toBeInTheDocument();
 });
@@ -154,7 +164,9 @@ test("check if TaskDetails renders", () => {
     };
     render(
         <AlertProvider>
-          <TaskDetails taskDetails={taskDetails}/>
+          <ApiProvider>
+            <TaskDetails taskDetails={taskDetails}/>
+          </ApiProvider>
         </AlertProvider>
     );
     const stopSchedulingTaskBt = screen.getByText("Stop scheduling");
@@ -178,7 +190,9 @@ test("check if TasksList with a DueTask child renders", () => {
                <tbody>
                  <tr>
                    <AlertProvider>
-                     <DueTask taskDetails={taskDetails} />
+                     <ApiProvider>
+                       <DueTask taskDetails={taskDetails} />
+                     </ApiProvider>
                    </AlertProvider>
                  </tr>
                </tbody>

@@ -7,7 +7,7 @@ import DeleteTaskDialog from "./DeleteTaskDialog.js";
 import { Trash } from "react-bootstrap-icons";
 
 export default function Task(
-    { taskDetails, apiEndpoint = "/v1/task/", toggleUpdate = f => f }) {
+    { taskDetails, toggleUpdate = f => f }) {
     const [deleteModalShow, setDeleteModalShow] = useState(false);
 
     const handleShow = () => setDeleteModalShow(true);
@@ -18,7 +18,6 @@ export default function Task(
             show={deleteModalShow}
             setShow={setDeleteModalShow}
             taskDetails={taskDetails}
-            apiEndpoint={apiEndpoint}
             onSuccess={toggleUpdate}
           />
           <td>
@@ -38,10 +37,7 @@ export default function Task(
             {taskDetails.intro_date}
           </td>
           <td>
-            <PreviousReviews
-              apiEndpoint={apiEndpoint}
-              taskId={taskDetails.id}
-            />
+            <PreviousReviews taskId={taskDetails.id}/>
           </td>
           <td>
             <Button

@@ -9,17 +9,29 @@ import { useApi } from "../contexts";
 export default function TaskTitle({ taskDetails }) {
     const [clicked, setClicked] = useReducer(_clicked => !_clicked);
     const [title, setTitle] = useState(taskDetails.title);
-    const handleTitleChange = e => setTitle(e.currentTarget.value);
+    const [editTitle, setEditedTitle] = useState(taskDetails.title);
+    const handleTitleChange = e => setEditedTitle(e.currentTarget.value);
     const { error } = useAlerts();
     const apiClient = useApi();
 
-    async function save(details, onFail = f => f, onSuccess = f => f) {
+    function cancel() {
+        setClicked();
+        setTitle(title);
+        setEditedTitle(title);
+    }
+
+    async function save() {
+        if (editTitle === title) {
+            setClicked();
+            return;
+        }
         let response = await apiClient
-            .patch(`/task/${details.id}/update`, details);
+            .patch(`/task/${taskDetails.id}/update`, {title: editTitle});
         if(!response.ok) {
-            onFail(response);
+            error(response.body.status);
         } else {
-            onSuccess();
+            setClicked();
+            setTitle(editTitle);
         }
     }
 
@@ -28,30 +40,19 @@ export default function TaskTitle({ taskDetails }) {
         <InputGroup>
           <Form.Control
             data-testid="title-input"
-            value={title}
+            value={editTitle}
             placeholder="Task title"
             onChange={handleTitleChange}
           />
           <Button
             variant="outline-info"
             title="save title"
-            onClick={
-                () => save({...taskDetails, title: title},
-                           response => {
-                               error(response.body.status);
-                               setTitle(taskDetails.title);
-                           },  // onFail
-                           () => setClicked()  // onSuccess
-                          )
-            }>
+            onClick={save}>
             <Check/>
           </Button>
           <Button
             title="cancel modifications"
-            onClick={() => {
-              setClicked();
-              setTitle(taskDetails.title);
-          }}
+            onClick={cancel}
                   variant="outline-warning">
             <X/>
           </Button>

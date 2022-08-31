@@ -2,7 +2,7 @@ from app import db
 from datetime import datetime
 from flask import request, jsonify, abort, make_response
 from sqlalchemy.exc import InvalidRequestError
-from ..models import Task, ReviewError
+from ..models import Task, ReviewError  # remove ReviewError
 from . import api_v1
 
 
