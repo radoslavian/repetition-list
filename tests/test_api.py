@@ -28,12 +28,12 @@ class TestApi(unittest.TestCase):
                      "due_date": "2022-08-04",
                      "multiplier": 1.8}
         response = self.client.post("/v1/add-task", json=task_data)
-
         # the "Created" response code
         self.assertEqual(response.status_code, 201)
 
         # check if task has been created in a database
         task = Task.query.first()
+        self.assertEqual(task.id, response.json["taskId"]);
         self.assertEqual(task.title, "Read a book again")
         self.assertEqual(task.multiplier, 1.8)
 

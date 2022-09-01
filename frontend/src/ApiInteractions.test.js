@@ -4,7 +4,7 @@ import { render,
          waitFor,
          waitForElementToBeRemoved } from "@testing-library/react";
 import { today } from "./utils.js";
-import { AlertProvider, ApiProvider } from "./contexts";
+import { AlertProvider, ApiProvider, TasksManager } from "./contexts";
 import App from "./App";
 import { act } from "react-dom/test-utils";
 
@@ -42,7 +42,9 @@ beforeEach(async () => {
     await act(() => render(
         <AlertProvider>
           <ApiProvider>
-            <App/>
+            <TasksManager>
+              <App/>
+            </TasksManager>
           </ApiProvider>
         </AlertProvider>
     ));
@@ -79,7 +81,7 @@ test("deleting item from a due list", async () => {
         .toEqual("DELETE");
 });
 
-test("reseting a task", async () => {
+test("resetting a task", async () => {
     const resetMenuItem = await screen.findByText("Reset");
     expect(resetMenuItem).toBeInTheDocument();
     await act(() => fireEvent.click(resetMenuItem));

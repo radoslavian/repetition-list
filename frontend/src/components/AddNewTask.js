@@ -7,8 +7,9 @@ import Form from "react-bootstrap/Form";
 import NewTaskDetails from "./NewTaskDetails";
 import DueDate from "./DueDate";
 import { useState } from "react";
-import { useAlerts, useApi } from "../contexts";
+import { useAlerts, useApi, useTasksManager } from "../contexts";
 import { today } from "../utils.js";
+
 
 function validateTaskData(taskData) {
     if(taskData.title === "") {
@@ -47,10 +48,16 @@ export default function AddNewTask({ apiEndpoint, onSuccessAdd = f => f }) {
         updateDescription("");
         updateIntervalMult(defaultMultiplicator);
     };
+    const { addTask } = useTasksManager();
+    if(!addTask) throw Error("addTask is undefined");
 
-    const onRequestSuccess = () => {
+    const onRequestSuccess = response => {
+        const newTask = {...taskData,
+                         active: true,
+                         id: response.body.taskId,
+                         intro_date: today()};
+        addTask(newTask);
         clearForm();
-        onSuccessAdd();
         info("Successfully added new task.");
     };
 

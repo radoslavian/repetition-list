@@ -147,8 +147,9 @@ def reset_task(task_id):
     task.reset()
 
     return make_response({
-        "taskId": task.id,
-        "status": "reset"
+        "intro_date": task.intro_date.isoformat(),
+        "due_date": task.due_date.isoformat(),
+        "multiplier": task.multiplier
     }, 200)
 
 
@@ -173,5 +174,5 @@ def change_task_status(task_id):
     db.session.commit()
 
     return make_response(
-        {"taskId": task.id,
-         "status": f"task status changed to active={task.active}"}, 200)
+         {"active": task.active,
+          "status": f"task status changed to active={task.active}"}, 200)

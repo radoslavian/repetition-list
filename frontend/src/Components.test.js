@@ -3,7 +3,7 @@ import { ApiProvider, AlertProvider } from "./contexts";
 import App from "./App";
 import PreviousReviews from "./components/PreviousReviews";
 import fetchMock from "fetch-mock-jest";
-import { useApi } from "./contexts";
+import { useApi, TasksManager } from "./contexts";
 
 test("if PreviousReviews renders review history list", async () => {
     const rows = [
@@ -62,7 +62,9 @@ test("check if App rendering doesn't run into exceptions", () => {
     render(
         <AlertProvider>
           <ApiProvider>
-            <App/>
+            <TasksManager>
+              <App/>
+            </TasksManager>
           </ApiProvider>
         </AlertProvider>
     );
@@ -81,7 +83,9 @@ test("check TaskTitle component renders", () => {
     render(
         <AlertProvider>
           <ApiProvider>
-            <TaskTitle taskDetails={taskDetails}/>
+            <TasksManager>
+              <TaskTitle taskDetails={taskDetails}/>
+            </TasksManager>
           </ApiProvider>
         </AlertProvider>
     );
@@ -94,7 +98,9 @@ import NewTaskDetails from "./components/NewTaskDetails";
 test("check if NewTaskDetails renders", () => {
     render(
         <ApiProvider>
-          <NewTaskDetails />
+          <TasksManager>
+            <NewTaskDetails />
+          </TasksManager>
         </ApiProvider>
     );
     expect(screen.getByText("Description...")).toBeInTheDocument();
@@ -122,7 +128,9 @@ import AddNewTask from "./components/AddNewTask";
 test("check AddNewTask renders", () => {
     render(<AlertProvider>
              <ApiProvider>
-               <AddNewTask />
+               <TasksManager>
+                 <AddNewTask />
+               </TasksManager>
              </ApiProvider>
            </AlertProvider>);
     const component = screen.getByTestId("add-new-task");
@@ -165,7 +173,9 @@ test("check if TaskDetails renders", () => {
     render(
         <AlertProvider>
           <ApiProvider>
-            <TaskDetails taskDetails={taskDetails}/>
+            <TasksManager>
+              <TaskDetails taskDetails={taskDetails}/>
+            </TasksManager>
           </ApiProvider>
         </AlertProvider>
     );
@@ -191,7 +201,9 @@ test("check if TasksList with a DueTask child renders", () => {
                  <tr>
                    <AlertProvider>
                      <ApiProvider>
-                       <DueTask taskDetails={taskDetails} />
+                       <TasksManager>
+                         <DueTask taskDetails={taskDetails} />
+                       </TasksManager>
                      </ApiProvider>
                    </AlertProvider>
                  </tr>

@@ -4,14 +4,16 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { ApiProvider, AlertProvider } from "./contexts";
+import { ApiProvider, AlertProvider, TasksManager } from "./contexts";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <React.StrictMode>
       <AlertProvider>
         <ApiProvider>
-          <App />
+          <TasksManager>
+            <App />
+          </TasksManager>
         </ApiProvider>
       </AlertProvider>
     </React.StrictMode>

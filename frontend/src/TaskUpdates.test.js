@@ -3,7 +3,7 @@ import { render,
          fireEvent } from "@testing-library/react";
 import { today } from "./utils.js";
 import PreviousReviews from "./components/PreviousReviews";
-import { ApiProvider, AlertProvider } from "./contexts";
+import { ApiProvider, AlertProvider, TasksManager } from "./contexts";
 import App from "./App";
 import { act } from "react-dom/test-utils";
 import fetchMock from "fetch-mock-jest";
@@ -47,7 +47,9 @@ beforeEach(async () => {
     await act(() => render(
         <AlertProvider>
           <ApiProvider>
-            <App/>
+            <TasksManager>
+              <App/>
+            </TasksManager>
           </ApiProvider>
         </AlertProvider>
     ));

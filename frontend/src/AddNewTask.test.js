@@ -4,9 +4,10 @@ import { render,
          fireEvent,
          waitFor,
        } from "@testing-library/react";
-import { AlertProvider, ApiProvider } from "./contexts";
+import { AlertProvider, ApiProvider, TasksManager } from "./contexts";
 import { today, delay } from "./utils";
 import App from "./App";
+
 // has .isEqual - deep comparison objects for equality
 import { _ } from "lodash";
 import { act } from "react-dom/test-utils";
@@ -62,11 +63,13 @@ describe("adding tasks to the database", () => {
 
     beforeEach(async () => {
         await act(() => render(
-            <AlertProvider>
-              <ApiProvider>
-                <App/>
-              </ApiProvider>
-            </AlertProvider>
+              <AlertProvider>
+                <ApiProvider>
+                  <TasksManager>
+                    <App/>
+                  </TasksManager>
+                </ApiProvider>
+              </AlertProvider>
         ));
     });
 

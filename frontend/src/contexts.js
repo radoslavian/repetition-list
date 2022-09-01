@@ -1,9 +1,27 @@
 import { createContext, useContext } from "react";
 import { useAlert } from "./components/Alert";
 import ApiClient from "./ApiClient";
+import { useTasks } from "./hooks";
 
 const AlertContext = createContext();
 const ApiContext = createContext();
+const TasksContext = createContext();
+
+export function TasksManager({ children }) {
+    return (
+        <TasksContext.Provider value={useTasks([])}>
+          { children }
+        </TasksContext.Provider>
+    );
+}
+
+export function useTasksManager() {
+    const context = useContext(TasksContext);
+    if(context === undefined) {
+        throw Error("useTasksManager must be used within TasksContext");
+    }
+    return context;
+}
 
 export function AlertProvider({ children }) {
     return (

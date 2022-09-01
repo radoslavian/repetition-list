@@ -42,46 +42,6 @@ class TestApp(unittest.TestCase):
         self.assertEqual(task.due_date,
                          date.today() + timedelta(days=Task.default_interval))
 
-    def test_new_due_date_calculator(self):
-        """Test default review dates calculator."""
-        # TODO: remove "magic" numbers
-
-        db.session.add(Task(title="Review book chapter",
-                            intro_date=date(2022, 1, 1),
-                            due_date=date(2023, 1, 31),
-                            description="John Kowolski. Title. Chapter 1.",
-                            multiplier=1.5,
-                            reviews=[
-                                ReviewData(reviewed_on=date(2022, 1, 31),
-                                           prev_due_date=date(2022, 3, 17),
-                                           multiplier=1.5),
-                                ReviewData(reviewed_on=date(2022, 3, 17),
-                                           prev_due_date=date(2022, 9, 1),
-                                           multiplier=1.5),
-                                ReviewData(reviewed_on=date(2022, 3, 17),
-                                           prev_due_date=date(2022, 5, 23),
-                                           multiplier=1.5),
-                            ]))
-        db.session.commit()
-
-        task = Task.query.order_by().first()
-        self.assertEqual(
-            date.today() + (date(2023, 1, 31) - date(2022, 9, 1)) * 1.5,
-            task.new_due_date())
-
-        task2 = Task(
-            title="Review book chapter",
-            intro_date=date(2022, 1, 1),
-            due_date=date(2023, 1, 31),
-            description="John Kowolski. Title. Chapter 1.",
-            multiplier=2)
-        db.session.add(task2)
-        db.session.commit()
-
-        self.assertEqual(
-            date.today() + (date(2023, 1, 31)-date(2022, 1, 1)) * 2,
-            task2.new_due_date())
-
     def test_review_data(self):
         task = Task(title="Review book chapter",
                     description="John Kowolski. Title. Chapter 1.",
@@ -133,6 +93,22 @@ class TestApp(unittest.TestCase):
 
         self.assertRaises(ValueError, raise_error)
 
+    def test_new_due_date_calculator(self):
+        """Test calculating new due_date when Task.reviews is empty."""
+
+        task = Task(
+            title="Review book chapter",
+            intro_date=date(2022, 1, 1),
+            due_date=date(2023, 1, 31),
+            description="John Kowolski. Title. Chapter 1.",
+            multiplier=2)
+        db.session.add(task)
+        db.session.commit()
+
+        self.assertEqual(
+            date.today() + (date(2023, 1, 31)-date(2022, 1, 1)) * 2,
+            task.new_due_date())
+
     def test_new_review_date(self):
         """Test making new review date based on ReviewData.
         Method tested: Task.new_due_date
@@ -141,20 +117,32 @@ class TestApp(unittest.TestCase):
                     intro_date=date(2022, 6, 15),
                     due_date=date(2022, 9, 3),
                     multiplier=2.0,
-                    # three entries - only for illustration
-                    # and possible future development
                     reviews=[
+                        # order is modified to test query selecting
+                        # the most recent due_date
                         ReviewData(reviewed_on=date(2022, 6, 21),
                                    multiplier=2.0,
                                    prev_due_date=date(2022, 6, 20)),
+                        ReviewData(reviewed_on=date(2022, 7, 25),
+                                   multiplier=2.0,
+                                   prev_due_date=date(2022, 7, 23)),
                         ReviewData(reviewed_on=date(2022, 7, 3),
                                    multiplier=2.0,
                                    prev_due_date=date(2022, 7, 1)),
-                        ReviewData(reviewed_on=date(2022, 7, 25),
-                                   multiplier=2.0,
-                                   prev_due_date=date(2022, 7, 23))
                     ])
-        db.session.add(task)
+
+        # check if query selects the most recent review only from
+        # those appended to the given task (and not from the whole table)
+        task2 = Task(title="task 2",
+                     intro_date=date(2022, 7, 13),
+                     due_date=date(2022, 10, 5),
+                     multiplier=1.0,
+                     reviews=[
+                         ReviewData(reviewed_on=date(2022, 9, 26),
+                                    multiplier=1.5,
+                                    prev_due_date=date(2022, 9, 19))
+                     ])
+        db.session.add_all([task, task2])
         db.session.commit()
         self.assertEqual((task.new_due_date() - date.today()),
                          (date(2022, 9, 3) - date(2022, 7, 23)) * 2)

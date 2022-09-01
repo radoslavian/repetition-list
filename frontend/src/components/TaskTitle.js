@@ -2,36 +2,35 @@ import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
 import Button from "react-bootstrap/Button";
 import { useState, useReducer } from "react";
-import { useAlerts } from "../contexts";
+import { useAlerts, useTasksManager } from "../contexts";
 import { Check, X } from "react-bootstrap-icons";
 import { useApi } from "../contexts";
 
 export default function TaskTitle({ taskDetails }) {
     const [clicked, setClicked] = useReducer(_clicked => !_clicked);
     const [title, setTitle] = useState(taskDetails.title);
-    const [editTitle, setEditedTitle] = useState(taskDetails.title);
-    const handleTitleChange = e => setEditedTitle(e.currentTarget.value);
+    const handleTitleChange = e => setTitle(e.currentTarget.value);
     const { error } = useAlerts();
     const apiClient = useApi();
+    const { updateTask } = useTasksManager();
 
     function cancel() {
         setClicked();
-        setTitle(title);
-        setEditedTitle(title);
+        setTitle(taskDetails.title);
     }
 
     async function save() {
-        if (editTitle === title) {
+        if (taskDetails.title === title) {
             setClicked();
             return;
         }
         let response = await apiClient
-            .patch(`/task/${taskDetails.id}/update`, {title: editTitle});
+            .patch(`/task/${taskDetails.id}/update`, {title: title});
         if(!response.ok) {
             error(response.body.status);
         } else {
             setClicked();
-            setTitle(editTitle);
+            updateTask({title: title}, taskDetails.id);
         }
     }
 
@@ -40,7 +39,7 @@ export default function TaskTitle({ taskDetails }) {
         <InputGroup>
           <Form.Control
             data-testid="title-input"
-            value={editTitle}
+            value={title}
             placeholder="Task title"
             onChange={handleTitleChange}
           />
