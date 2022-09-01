@@ -43,13 +43,15 @@ def add_task():
         else:
             data = request.json
         try:
-            db.session.add(Task(**data))
+            task = Task(**data)
+            db.session.add(task)
             db.session.commit()
         except (ValueError, TypeError) as e:
             db.session.rollback()
             abort(400, str(e))
 
-    return make_response({"status": "Created"}, 201)
+    return make_response({"status": "Created",
+                          "taskId": task.id}, 201)
 
 
 @api_v1.route("/v1/task/<int:task_id>", methods=["GET"])
