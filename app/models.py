@@ -65,8 +65,8 @@ class Task(db.Model):
             # query that selects last review due_date
             # from rows sorted according to a date
             last_due_date = ReviewData.query.join(
-                Task, ReviewData.task).filter(Task.id == self.id).first(
-                ).prev_due_date
+                Task, ReviewData.task).filter(Task.id == self.id).order_by(
+                    desc(ReviewData.prev_due_date)).first().prev_due_date
             review_span = self.due_date - last_due_date
         new_review_span = review_span * self.multiplier
 
