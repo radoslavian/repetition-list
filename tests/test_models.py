@@ -132,3 +132,29 @@ class TestApp(unittest.TestCase):
             task.title = ""
 
         self.assertRaises(ValueError, raise_error)
+
+    def test_new_review_date(self):
+        """Test making new review date based on ReviewData.
+        Method tested: Task.new_due_date
+        """
+        task = Task(title="task title",
+                    intro_date=date(2022, 6, 15),
+                    due_date=date(2022, 9, 3),
+                    multiplier=2.0,
+                    # three entries - only for illustration
+                    # and possible future development
+                    reviews=[
+                        ReviewData(reviewed_on=date(2022, 6, 21),
+                                   multiplier=2.0,
+                                   prev_due_date=date(2022, 6, 20)),
+                        ReviewData(reviewed_on=date(2022, 7, 3),
+                                   multiplier=2.0,
+                                   prev_due_date=date(2022, 7, 1)),
+                        ReviewData(reviewed_on=date(2022, 7, 25),
+                                   multiplier=2.0,
+                                   prev_due_date=date(2022, 7, 23))
+                    ])
+        db.session.add(task)
+        db.session.commit()
+        self.assertEqual((task.new_due_date() - date.today()),
+                         (date(2022, 9, 3) - date(2022, 7, 23)) * 2)
