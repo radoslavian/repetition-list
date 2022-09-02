@@ -13,7 +13,7 @@ export default function DeleteTaskDialog(
     function handleResponse(response) {
         handleClose();
         response.ok ? dropTask(taskDetails) :
-            error("Error when attempting to delete the task:"
+            error("Error when attempting to delete the task: "
                   + response.body.status);
     }
 
