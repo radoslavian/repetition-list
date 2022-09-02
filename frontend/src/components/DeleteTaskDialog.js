@@ -11,12 +11,10 @@ export default function DeleteTaskDialog(
     const { error } = useAlerts();
 
     function handleResponse(response) {
-        if(response.ok) {
-            dropTask(taskDetails);
-            handleClose();
-        } else {
-            error(response.status);
-        }
+        handleClose();
+        response.ok ? dropTask(taskDetails) :
+            error("Error when attempting to delete the task:"
+                  + response.body.status);
     }
 
     const handleDelete = () => apiClient

@@ -14,7 +14,7 @@ export default function TaskDetails({ taskDetails }) {
     const { error } = useAlerts();
     const { tasks, updateTask } = useTasksManager();
     const apiClient = useApi();
-    const timeout = 500;
+    const timeout = 300;
 
     // Without useCallback, function returned wouldn't
     // debounce properly - new function instance would be created
