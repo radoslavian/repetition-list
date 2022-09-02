@@ -12,7 +12,7 @@ export default function TaskDetails({ taskDetails }) {
         taskDetails
     );
     const { error } = useAlerts();
-    const { updateTask } = useTasksManager();
+    const { tasks, updateTask } = useTasksManager();
     const apiClient = useApi();
     const timeout = 500;
 
@@ -20,6 +20,10 @@ export default function TaskDetails({ taskDetails }) {
     // debounce properly - new function instance would be created
     // on each render; with an empty dependency array - it is created
     // only once.
+    // Important: useCallback (or useMemo) need to have correct dependencies
+    // attached - otherwise state updates will be incorrect.
+    // In case problems arise, consider creating single debounced
+    // ApiClient.patch function.
 
     const handleResponse = (response, newData) => {
         if(!response.ok) {
@@ -49,9 +53,8 @@ export default function TaskDetails({ taskDetails }) {
     const handleStatusChange = response => response.ok ? updateTask(
         {active: response.body.active}, taskDetails.id) :
           error("Failed to update task!");
-    const onDescChange = useCallback(onChange("description"), []);
-    const onMultiplierChange = useCallback(
-        onChange("multiplier"), []);
+    const onDescChange = useCallback(onChange("description"), [tasks]);
+    const onMultiplierChange = useCallback(onChange("multiplier"), [tasks]);
     const changeStatus = () => apiClient
           .patch(`/task/${details.id}/status`)
           .then(handleStatusChange);

@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 export function useTasks(initialSet) {
-    // edit list of tasks
+    // manage list of tasks
 
     const [tasks, setTasks] = useState(initialSet);
 
