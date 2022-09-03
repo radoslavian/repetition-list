@@ -27,7 +27,7 @@ export default function App() {
             }
         });
     }
-    useEffect(() => getTasks(), []);
+    useEffect(getTasks, []);
 
     return (
         <>
