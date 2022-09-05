@@ -7,7 +7,7 @@ import { Check, X } from "react-bootstrap-icons";
 import { useApi } from "../contexts";
 
 export default function TaskTitle({ taskDetails }) {
-    const [clicked, setClicked] = useReducer(_clicked => !_clicked);
+    const [clicked, setClicked] = useReducer(_clicked => !_clicked, false);
     const [title, setTitle] = useState(taskDetails.title);
     const handleTitleChange = e => setTitle(e.currentTarget.value);
     const { error } = useAlerts();
@@ -24,7 +24,7 @@ export default function TaskTitle({ taskDetails }) {
             setClicked();
             return;
         }
-        let response = await apiClient
+        const response = await apiClient
             .patch(`/task/${taskDetails.id}/update`, {title: title});
         if(!response.ok) {
             error(response.body.status);
@@ -52,7 +52,7 @@ export default function TaskTitle({ taskDetails }) {
           <Button
             title="cancel modifications"
             onClick={cancel}
-                  variant="outline-warning">
+            variant="outline-warning">
             <X/>
           </Button>
         </InputGroup>

@@ -31,6 +31,14 @@ export function AlertProvider({ children }) {
     );
 }
 
+export function useAlerts() {
+    const context = useContext(AlertContext);
+    if(context === undefined) {
+        throw Error("useAlerts must be used within an AlertProvider");
+    }
+    return context;
+}
+
 export function ApiProvider({ children }) {
     const api = new ApiClient("/v1");
 
@@ -48,12 +56,4 @@ export function useApi() {
     }
     return apiContext;
     
-}
-
-export function useAlerts() {
-    const context = useContext(AlertContext);
-    if(context === undefined) {
-        throw Error("useAlerts must be used within an AlertProvider");
-    }
-    return context;
 }

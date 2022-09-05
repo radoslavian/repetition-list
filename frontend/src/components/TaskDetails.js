@@ -8,31 +8,24 @@ import { useAlerts, useApi, useTasksManager } from "../contexts";
 
 export default function TaskDetails({ taskDetails }) {
     const [details, updateDetails] = useReducer(
-        (details, newDetails) => ({...details, ...newDetails}),
-        taskDetails
-    );
+        (details, newDetails) => ({...details, ...newDetails}), taskDetails);
     const { error } = useAlerts();
     const { tasks, updateTask } = useTasksManager();
     const apiClient = useApi();
-    const timeout = 300;
+    const timeout = 300;  // debouncing timeout
 
     // Without useCallback, function returned wouldn't
     // debounce properly - new function instance would be created
-    // on each render; with an empty dependency array - it is created
-    // only once.
+    // on each render, **though** with an empty dependency array -
+    // it is created only once and closure becomes
+    // stale on subsequent updates:
     // Important: useCallback (or useMemo) need to have correct dependencies
     // attached - otherwise state updates will be incorrect.
     // In case problems arise, consider creating single debounced
     // ApiClient.patch function.
 
-    const handleResponse = (response, newData) => {
-        if(!response.ok) {
-            error(response.body.status);
-        } else {
-            updateTask(newData, taskDetails.id);
-        }
-    };
-
+    const handleResponse = (response, newData) => response.ok ? updateTask(
+        newData, taskDetails.id) : error(response.body.status);
 
     function onChange(key) {
         const patch = debounce((route, obj) => apiClient
@@ -40,6 +33,7 @@ export default function TaskDetails({ taskDetails }) {
                                .then(response => handleResponse(
                                    response, obj)), timeout);
         const getValue = ev => { return {[key]: ev.currentTarget.value}; };
+
         return async ev => {
             const obj = getValue(ev);
             updateDetails({...obj});
@@ -49,7 +43,7 @@ export default function TaskDetails({ taskDetails }) {
 
     const handleReset = response => response.ok ? updateTask(
         response.body, taskDetails.id) :
-          error(`Failed to reset task:\n${response.body.status}`);
+          error(`Failed to reset task: ${response.body.status}`);
     const handleStatusChange = response => response.ok ? updateTask(
         {active: response.body.active}, taskDetails.id) :
           error("Failed to update task!");

@@ -23,7 +23,7 @@ function renderTasksHeader(header) {
     };
 }
 
-export default function TaskGroupSwitcher({ allTasks = [], toggleUpdate }) {
+export default function TaskGroupSwitcher({ allTasks = [] }) {
     const [key, setKey] = useState("due");
     const [dueTasks, upcomingTasks, inactiveTasks] = [
         allTasks.filter(
@@ -58,31 +58,25 @@ export default function TaskGroupSwitcher({ allTasks = [], toggleUpdate }) {
         >
           <Tab eventKey="due" title="Due reviews">
             <Table
-              data-testid="tasks-table"
+              data-testid="due-tasks-table"
             >
               <tbody>
                 {dueTasksHeader(dueTasks)}
                 {dueTasks.map(task => (
                     <tr key={`a${task.id}`}>
-                      <DueTask
-                        taskDetails={task}
-                        toggleUpdate={toggleUpdate}
-                      />
+                      <DueTask taskDetails={task}/>
                     </tr>))}
               </tbody>
             </Table>
           </Tab>
           <Tab eventKey="upcoming" title="Upcoming reviews">
-            <Table>
+            <Table data-testid="upcoming-tasks-list">
               <tbody>
                 {tasksHeader(upcomingTasks)}
-                  {upcomingTasks.map((task, i) => (
-                      <tr key={`b${task.id}`}>
-                        <Task
-                          taskDetails={task}
-                          toggleUpdate={toggleUpdate}
-                        />
-                        </tr>))}
+                {upcomingTasks.map((task, i) => (
+                    <tr key={`b${task.id}`}>
+                      <Task taskDetails={task}/>
+                    </tr>))}
              </tbody>
            </Table>
           </Tab>
@@ -92,10 +86,7 @@ export default function TaskGroupSwitcher({ allTasks = [], toggleUpdate }) {
                 {tasksHeader(inactiveTasks)}
                 {inactiveTasks.map((task, i) => (
                     <tr key={`c${task.id}`}>
-                      <Task
-                        taskDetails={task}
-                        toggleUpdate={toggleUpdate}
-                      />
+                      <Task taskDetails={task}/>
                     </tr>))}
               </tbody>
             </Table>

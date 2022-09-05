@@ -10,7 +10,6 @@ import { useState } from "react";
 import { useAlerts, useApi, useTasksManager } from "../contexts";
 import { today } from "../utils.js";
 
-
 function validateTaskData(taskData) {
     if(taskData.title === "") {
         throw new Error("Empty title");
@@ -24,12 +23,12 @@ function validateTaskData(taskData) {
     }
 }
 
-export default function AddNewTask({ apiEndpoint, onSuccessAdd = f => f }) {
-    const defaultMultiplicator = 1.2;
+export default function AddNewTask({ apiEndpoint }) {
+    const defaultMultiplier = 1.2;
     const [title, updateTitle] = useState("");
     const [description, updateDescription] = useState("");
     const [intervalMultiplier, updateIntervalMult] = useState(
-        defaultMultiplicator);
+        defaultMultiplier);
     const [date, updateDate] = useState(today(10));
     const { error, info } = useAlerts();
     const taskData = {title: title,
@@ -37,19 +36,18 @@ export default function AddNewTask({ apiEndpoint, onSuccessAdd = f => f }) {
                       multiplier: intervalMultiplier,
                       due_date: date};
     const apiClient = useApi();
+    const { addTask } = useTasksManager();
 
     const handleTitleChange = e => updateTitle(e.currentTarget.value);
     const handleDescChange = e => updateDescription(e.currentTarget.value);
     const handleMultiplierChange = e => updateIntervalMult(
         e.currentTarget.value);
     const handleDateChange = e => updateDate(e.currentTarget.value);
-    const clearForm = () => {
+    function clearForm() {
         updateTitle("");
         updateDescription("");
-        updateIntervalMult(defaultMultiplicator);
-    };
-    const { addTask } = useTasksManager();
-    if(!addTask) throw Error("addTask is undefined");
+        updateIntervalMult(defaultMultiplier);
+    }
 
     const onRequestSuccess = response => {
         const newTask = {...taskData,

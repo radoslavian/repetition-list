@@ -1,7 +1,10 @@
 import { default as BSAlert } from "react-bootstrap/Alert";
 import { useState } from "react";
 
-export function Alert({ message, remove, variant }) {
+const fallbackRemove = () => console.warn(
+    "No alert 'remove' function specified in Alert.js");
+
+export function Alert({ message, remove = fallbackRemove, variant }) {
     const [show, setShow] = useState(true);
     const handleClose = () => {
         setShow(false);
@@ -40,7 +43,7 @@ export function useAlert() {
     const renderAlerts = () => alerts.map(
         (alert, i) => (
             <Alert
-              key={`Error-${Math.random()*1000}`}
+              key={`Error-${Math.random()*100}`}
               message={alert.message}
               variant={alert.variant}
               // array index to be removed from alerts

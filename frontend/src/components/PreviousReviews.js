@@ -10,20 +10,19 @@ export default function PreviousReviews({ taskId, expanded = false }) {
     const apiClient = useApi();
 
     function loadData() {
-        if(!open) {
-            return;
-        }
+        if(!open) return;
         apiClient.get(`/task/${taskId}/reviews`)
             .then(response => setReviewsData(response.body));
     }
-    useEffect(() => loadData(), [open]);
+    useEffect(loadData, [open]);
 
     return (
         <>
           <a
             className="link-secondary"
-            href="#" onClick={() => setOpen(!open)}
-             aria-expanded={open}
+            href="#"
+            onClick={() => setOpen(!open)}
+            aria-expanded={open}
           >
             Previous&nbsp;reviews&hellip;
           </a>

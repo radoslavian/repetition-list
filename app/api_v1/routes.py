@@ -126,7 +126,9 @@ def tick_off(task_id):
         task.tick_off()
     except ReviewError:
         abort(400)
-    return make_response({"status": "updated"}, 200)
+    return make_response({"status": "updated",
+                          "due_date": task.due_date.isoformat(),
+    }, 200)
 
 
 @api_v1.route("/v1/task/<int:task_id>", methods=["DELETE"])

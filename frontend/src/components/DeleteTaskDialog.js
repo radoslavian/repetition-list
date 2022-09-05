@@ -3,7 +3,7 @@ import Modal from "react-bootstrap/Modal";
 import { useAlerts, useApi, useTasksManager } from "../contexts";
 
 export default function DeleteTaskDialog(
-    { taskDetails, onSuccess, show, setShow = f => f }) {
+    { taskDetails, show, setShow = f => f }) {
     const taskTitle = `${taskDetails.title} (id ${taskDetails.id})`;
     const { dropTask } = useTasksManager();
     const handleClose = () => setShow(false);

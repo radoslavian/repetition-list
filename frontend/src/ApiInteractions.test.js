@@ -1,8 +1,7 @@
 import { render,
          screen,
-         fireEvent,
-         waitFor,
-         waitForElementToBeRemoved } from "@testing-library/react";
+         fireEvent} from "@testing-library/react";
+import { within } from "@testing-library/dom";
 import { today } from "./utils.js";
 import { AlertProvider, ApiProvider, TasksManager } from "./contexts";
 import App from "./App";
@@ -62,11 +61,20 @@ test("displaying task on the tasks list", async () => {
 
 test("ticking-off a task", async () => {
     fetchMock.putOnce("http://localhost:3000/v1/task/1/tick-off",
-                      new Response({taskId: 1, status: 200}));
+                      JSON.stringify({
+                          "status": "updated",
+                          "due_date": today(2)}));
     const tickOffBt = await screen.findByLabelText("tick off");
     await act(async () => fireEvent.click(tickOffBt));
+    const dueTasks = screen.getByTestId("due-tasks-table");
+    const upcoming = screen.getByTestId("upcoming-tasks-list");
+
     expect(fetchMock.called("http://localhost:3000/v1/task/1/tick-off"))
         .toBeTruthy();
+    expect(within(dueTasks).queryByText("test title")).toBeNull();
+    expect(await within(upcoming).findByText("test title"))
+        .toBeInTheDocument();
+    expect(await within(upcoming).findByText(today(2))).toBeInTheDocument();
 });
 
 test("deleting item from a due list", async () => {

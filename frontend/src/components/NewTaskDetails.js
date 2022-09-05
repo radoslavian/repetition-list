@@ -8,19 +8,19 @@ import { useState } from "react";
 export default function NewTaskDetails(
     { onDescChange, onMultiplierChange, intervalMultiplier,
       descriptionValue = "", children }) {
-    const [open, setOpen] = useState(false);
+    const [opened, setOpened] = useState(false);
 
     return (
         <>
           <a
             href="#"
             className="link-secondary"
-            onClick={() => setOpen(!open)}
-            aria-expanded={open}
+            onClick={() => setOpened(!opened)}
+            aria-expanded={opened}
           >
             Details&hellip;
           </a>
-          <Collapse in={open}>
+          <Collapse in={opened}>
             <Card.Body>
               <InputGroup>
                 <TaskDescription
