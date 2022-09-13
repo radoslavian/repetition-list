@@ -1,4 +1,5 @@
 import Form from "react-bootstrap/Form";
+import ReactMarkdown from "react-markdown";
 import { useReducer, useState } from "react";
 import Button from "react-bootstrap/Button";
 
@@ -17,8 +18,8 @@ export default function TaskDescription({ onChange = f => f, value = "" }) {
               onBlur={setEdit}
             />
         :
-        <p >
-          {value}<br />
+        <p>
+          <ReactMarkdown>{value}</ReactMarkdown>
           <Button
             onClick={setEdit}
             variant="outline-secondary"
