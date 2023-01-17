@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { ApiProvider, AlertProvider } from "./contexts";
 import App from "./App";
 import PreviousReviews from "./components/PreviousReviews";
@@ -72,25 +72,40 @@ test("check if App rendering doesn't run into exceptions", () => {
 
 import TaskTitle from "./components/TaskTitle";
 
-test("check TaskTitle component renders", () => {
-    const taskDetails = {
-        due_date: "2022-11-19",
-        id: 1,
-        title: "test title",
-        active: true
-    };
+describe("test TaskTitle component", () => {
+    beforeEach(() => {
+        const taskDetails = {
+            due_date: "2022-11-19",
+            id: 1,
+            title: "test title",
+            active: true
+        };
 
-    render(
-        <AlertProvider>
-          <ApiProvider>
-            <TasksManager>
-              <TaskTitle taskDetails={taskDetails}/>
-            </TasksManager>
-          </ApiProvider>
-        </AlertProvider>
-    );
-    const component = screen.getByText("test title");
-    expect(component).toBeInTheDocument();
+        render(
+            <AlertProvider>
+              <ApiProvider>
+                <TasksManager>
+                  <TaskTitle taskDetails={taskDetails}/>
+                </TasksManager>
+              </ApiProvider>
+            </AlertProvider>
+        );
+    });
+
+    test("if TaskTitle component renders", () => {
+        const component = screen.getByText("test title");
+        expect(component).toBeInTheDocument();
+    });
+
+    test("if tooltips over titles appear when hovered", async () => {
+        const tooltipText = '"test title", click to edit';
+        const component = screen.getByText("test title");
+
+        fireEvent.mouseOver(component);
+        await waitFor(() => expect(screen.getByText(
+            tooltipText)).toBeInTheDocument(),
+                      {timeout: 2000, interval: 100});
+    });
 });
 
 import NewTaskDetails from "./components/NewTaskDetails";
@@ -214,8 +229,7 @@ test("check if TasksList with a DueTask child renders", () => {
 });
 import TasksGroupSwitcher from "./components/TasksGroupSwitcher.js";
 
-test("check if TasksGroupSwitcher renders", () => {
+test("if TasksGroupSwitcher renders", () => {
     render(<TasksGroupSwitcher/>);
     expect(screen.getByText("Inactive reviews")).toBeInTheDocument();
 });
-

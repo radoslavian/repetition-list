@@ -1,6 +1,6 @@
 import { render,
          screen,
-         fireEvent} from "@testing-library/react";
+         fireEvent } from "@testing-library/react";
 import { within } from "@testing-library/dom";
 import { today } from "./utils.js";
 import { AlertProvider, ApiProvider, TasksManager } from "./contexts";

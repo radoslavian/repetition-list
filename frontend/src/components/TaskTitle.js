@@ -1,6 +1,8 @@
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
 import Button from "react-bootstrap/Button";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Tooltip from 'react-bootstrap/Tooltip';
 import { useState, useReducer } from "react";
 import { useAlerts, useTasksManager } from "../contexts";
 import { Check, X } from "react-bootstrap-icons";
@@ -34,21 +36,32 @@ export default function TaskTitle({ taskDetails }) {
         }
     }
 
+    const renderTooltip = props => (
+        <Tooltip {...props}>
+          {  '"' + title  + '"' + ", click to edit"}
+        </Tooltip>
+    );
+    const triggerProps = {
+        placement: "top",
+        delay: { show: 1000, hide: 200 },
+        overlay: renderTooltip
+    };
+
     return (
         clicked || !taskDetails.id ?
-        <InputGroup>
-          <Form.Control
-            data-testid="title-input"
-            value={title}
-            placeholder="Task title"
-            onChange={handleTitleChange}
-          />
-          <Button
-            variant="outline-info"
-            title="save title"
-            onClick={save}>
-            <Check/>
-          </Button>
+            <InputGroup>
+              <Form.Control
+                data-testid="title-input"
+                value={title}
+                placeholder="Task title"
+                onChange={handleTitleChange}
+              />
+              <Button
+                variant="outline-info"
+                title="save title"
+                onClick={save}>
+                <Check/>
+              </Button>
           <Button
             title="cancel modifications"
             onClick={cancel}
@@ -57,11 +70,14 @@ export default function TaskTitle({ taskDetails }) {
           </Button>
         </InputGroup>
         :
-        <p
-          onClick={setClicked}
-          aria-label={title}
+        <OverlayTrigger {...triggerProps}>
+          <p
+            onClick={setClicked}
+            aria-label={title}
+            className="task-title"
         >
           {title}
         </p>
+        </OverlayTrigger>
     );
 }
