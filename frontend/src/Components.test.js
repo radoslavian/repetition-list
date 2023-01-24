@@ -1,11 +1,39 @@
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { render,
+         cleanup,
+         screen,
+         waitFor,
+         fireEvent } from "@testing-library/react";
 import { ApiProvider, AlertProvider } from "./contexts";
 import App from "./App";
 import PreviousReviews from "./components/PreviousReviews";
 import fetchMock from "fetch-mock-jest";
 import { useApi, TasksManager } from "./contexts";
+import { act } from "react-dom/test-utils";
+
+// components imports
+import NewTaskDetails from "./components/NewTaskDetails";
+import TasksGroupSwitcher from "./components/TasksGroupSwitcher.js";
+
+test("check if App rendering doesn't run into exceptions", async () => {
+    fetchMock.get("http://localhost:3000/v1/tasks",
+                  JSON.stringify([]));
+    await act(() => render(
+        <AlertProvider>
+          <ApiProvider>
+            <TasksManager>
+              <App/>
+            </TasksManager>
+          </ApiProvider>
+        </AlertProvider>
+    ));
+    await waitFor(() => expect(
+        fetchMock.called("http://localhost:3000/v1/tasks")).toBeTruthy());
+    fetchMock.restore();
+    fetchMock.reset();
+});
 
 test("if PreviousReviews renders review history list", async () => {
+    // should be split into tests within a describe block
     const rows = [
         {
             "multiplier": 1.0, 
@@ -28,7 +56,7 @@ test("if PreviousReviews renders review history list", async () => {
 
     // this way the "test was not wrapped in act(...)" message
     // no longer appears
-    waitFor(() => render(
+    await waitFor(() => render(
         <ApiProvider>
           <PreviousReviews
             taskId="1" apiEndpoint="/v1/task/"
@@ -57,19 +85,6 @@ test("if PreviousReviews renders review history list", async () => {
     fetchMock.reset();
 });
 
-test("check if App rendering doesn't run into exceptions", () => {
-    // this should be expanded
-    render(
-        <AlertProvider>
-          <ApiProvider>
-            <TasksManager>
-              <App/>
-            </TasksManager>
-          </ApiProvider>
-        </AlertProvider>
-    );
-});
-
 import TaskTitle from "./components/TaskTitle";
 
 describe("test TaskTitle component", () => {
@@ -80,8 +95,7 @@ describe("test TaskTitle component", () => {
             title: "test title",
             active: true
         };
-
-        render(
+       render(
             <AlertProvider>
               <ApiProvider>
                 <TasksManager>
@@ -107,8 +121,6 @@ describe("test TaskTitle component", () => {
                       {timeout: 2000, interval: 100});
     });
 });
-
-import NewTaskDetails from "./components/NewTaskDetails";
 
 test("check if NewTaskDetails renders", () => {
     render(
@@ -178,14 +190,16 @@ test("check if NewTaskDetails renders itself and children", () => {
 
 import TaskDetails from "./components/TaskDetails.js";
 
-test("check if TaskDetails renders", () => {
+test("check if TaskDetails renders", async () => {
     const taskDetails = {
         due_date: "2022-11-19",
         id: 1,
         title: "test-title",
         active: true
     };
-    render(
+
+    // works somehow with waitFor, doesn't work with act()
+    await waitFor(() => render(
         <AlertProvider>
           <ApiProvider>
             <TasksManager>
@@ -193,7 +207,7 @@ test("check if TaskDetails renders", () => {
             </TasksManager>
           </ApiProvider>
         </AlertProvider>
-    );
+    ));
     const stopSchedulingTaskBt = screen.getByText("Stop scheduling");
     const resetTaskBt = screen.getByText("Reset");
     expect(stopSchedulingTaskBt).toBeInTheDocument();
@@ -203,7 +217,11 @@ test("check if TaskDetails renders", () => {
 import DueTask from "./components/DueTask.js";
 import Table from "react-bootstrap/Table";
 
-test("check if TasksList with a DueTask child renders", () => {
+test("check if TasksList with a DueTask child renders", async () => {
+    // When performing, produces a following warning:
+    // When testing, code that causes React state
+    // updates should be wrapped into act(...)
+
     const taskDetails = {
         due_date: "2022-11-19",
         id: 1,
@@ -211,25 +229,60 @@ test("check if TasksList with a DueTask child renders", () => {
     };
     // App produces Context so has to be rendered before DueTask
     // How to make it less interwined?
-    render( <Table>
-               <tbody>
-                 <tr>
-                   <AlertProvider>
-                     <ApiProvider>
-                       <TasksManager>
-                         <DueTask taskDetails={taskDetails} />
-                       </TasksManager>
-                     </ApiProvider>
-                   </AlertProvider>
-                 </tr>
-               </tbody>
-            </Table>
-          );
+    await waitFor(() =>render(
+        <table>
+          <tbody>
+            <tr>
+              <AlertProvider>
+                <ApiProvider>
+                  <TasksManager>
+                    <DueTask taskDetails={taskDetails} />
+                  </TasksManager>
+                </ApiProvider>
+              </AlertProvider>
+            </tr>
+          </tbody>
+        </table>
+    ));
     expect(screen.getByText("Details…")).toBeInTheDocument();
 });
-import TasksGroupSwitcher from "./components/TasksGroupSwitcher.js";
 
 test("if TasksGroupSwitcher renders", () => {
     render(<TasksGroupSwitcher/>);
     expect(screen.getByText("Inactive reviews")).toBeInTheDocument();
 });
+
+test("if TasksGroupSwitcher renders 'No review tasks...'"
+     + " header in all tabs.", async () => {
+         const NUMBER_OF_TABS = 3;
+         render(<TasksGroupSwitcher allTasks={[]}/>);
+         await expect(screen.getAllByText("No review tasks on this list.")
+                      .length)
+             .toBe(NUMBER_OF_TABS);
+});
+
+test("if TasksGroupSwitcher renders 'No review tasks...' on two of three tabs",
+     // Warning: An update to DropdownMenu inside a
+     // test was not wrapped in act(...).
+     async () => {
+         const taskDetails = {
+             due_date: "2022-11-19",
+             id: 1,
+             title: "test title",
+             active: true
+         };
+         await waitFor(() => render(
+             <AlertProvider>
+               <ApiProvider>
+                 <TasksManager>
+                   <TasksGroupSwitcher allTasks={[taskDetails]}/>
+                 </TasksManager>
+               </ApiProvider>
+             </AlertProvider>
+         ));
+         const NUMBER_OF_TABS = 2;
+         expect(screen.getAllByText(
+             "No review tasks on this list.")
+                .length).toBe(NUMBER_OF_TABS);
+     });
+
