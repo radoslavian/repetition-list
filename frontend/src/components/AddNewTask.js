@@ -1,7 +1,5 @@
 import React from "react";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
+import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import NewTaskDetails from "./NewTaskDetails";
@@ -25,6 +23,9 @@ function validateTaskData(taskData) {
 
 export default function AddNewTask({ apiEndpoint }) {
     const defaultMultiplier = 1.2;
+    const [show, setShow] = useState(false);
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
     const [title, updateTitle] = useState("");
     const [description, updateDescription] = useState("");
     const [intervalMultiplier, updateIntervalMult] = useState(
@@ -73,46 +74,61 @@ export default function AddNewTask({ apiEndpoint }) {
 
             if(response.ok) {
                 onSuccess(response);
+                handleClose();
             } else {
                 onFail(response.body.message);
             }
         };
     }
 
+    // test: closing window
+
     return (
-        <Container fluid data-testid="add-new-task">
-          <h5 className="mt-2">Add new task:</h5>
-          <Row>
-            <Col className="pt-2 pr-0">
+        <>
+          <Button variant="success" onClick={handleShow}>
+            Add&nbsp;new&nbsp;task
+          </Button>
+
+          <Modal
+            show={show}
+            onHide={handleClose}
+            backdrop="static"
+            keyboard={false}
+            data-testid="add-new-task"
+            centered
+          >
+            <Modal.Header closeButton>
+              Add new task:
+            </Modal.Header>
+            <Modal.Body>
               <Form.Control
                 value={title}
                 placeholder="New task title"
                 onChange={handleTitleChange}
               />
-            </Col>
-            <Col>
               <NewTaskDetails
                 descriptionValue={description}
                 intervalMultiplier={intervalMultiplier}
                 onDescChange={handleDescChange}
                 onMultiplierChange={handleMultiplierChange}
               />
-            </Col>
-            <Col>
               <DueDate
                 value={date}
                 onChange={handleDateChange}
               />
-            </Col>
-            <Col>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleClose}>
+                Cancel
+              </Button>
               <Button
                 variant="info"
-                onClick={addBtClick(
-                    taskData, onRequestSuccess)}
-              >+
+                onClick={addBtClick(taskData, onRequestSuccess)}
+              >
+                Add&nbsp;&&nbsp;close
               </Button>
-            </Col>
-          </Row>
-        </Container>
+            </Modal.Footer>
+          </Modal>
+        </>
     );
 }

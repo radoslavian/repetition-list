@@ -1,8 +1,8 @@
 import Form from "react-bootstrap/Form";
 
 // uncomment this and further down the code - when exporting into production
-// import ReactMarkdown from "react-markdown";
-import { useReducer, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import { useReducer } from "react";
 import Button from "react-bootstrap/Button";
 
 export default function TaskDescription({ onChange = f => f, value = "" }) {
@@ -21,8 +21,7 @@ export default function TaskDescription({ onChange = f => f, value = "" }) {
             />
         :
         <p>
-          {/* <ReactMarkdown>{value}</ReactMarkdown> */}
-          {value}
+          <ReactMarkdown>{value}</ReactMarkdown>
           <Button
             onClick={setEdit}
             variant="link"
