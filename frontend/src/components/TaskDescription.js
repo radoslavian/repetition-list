@@ -25,10 +25,10 @@ export default function TaskDescription({ onChange = f => f, value = "" }) {
           {value}
           <Button
             onClick={setEdit}
-            variant="outline-secondary"
+            variant="link"
             size="sm"
           >
-            {value ? "Edit" : "Description..."}
+            {value ? "Edit" : "Add description..."}
           </Button>
         </p>
     );

@@ -12,7 +12,7 @@ export default function TaskDetails({ taskDetails }) {
     const { error } = useAlerts();
     const { tasks, updateTask } = useTasksManager();
     const apiClient = useApi();
-    const timeout = 300;  // debouncing timeout
+    const debouncingTimeout = 300;
 
     // Without useCallback, function returned wouldn't
     // debounce properly - new function instance would be created
@@ -31,7 +31,7 @@ export default function TaskDetails({ taskDetails }) {
         const patch = debounce((route, obj) => apiClient
                                .patch(route, obj)
                                .then(response => handleResponse(
-                                   response, obj)), timeout);
+                                   response, obj)), debouncingTimeout);
         const getValue = ev => { return {[key]: ev.currentTarget.value}; };
 
         return async ev => {

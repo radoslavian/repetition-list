@@ -63,10 +63,13 @@ afterAll(() => {
 test("modifying task description", async () => {
     // replaces original implementation of setTimeout()
     jest.useFakeTimers();
+    screen.findByText("Details…")
+        .then(element => fireEvent.click(element));
     const editButton = await screen.findByText("Edit");
     fireEvent.click(editButton);
     const descriptbionEdit = await screen.findByText(
         "usual task description");
+
     expect(descriptbionEdit).toBeInTheDocument();
     fireEvent.change(
         descriptbionEdit,

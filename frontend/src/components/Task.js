@@ -1,10 +1,10 @@
 import PreviousReviews from "./PreviousReviews.js";
-import TaskDetails from "./TaskDetails.js";
 import TaskTitle from "./TaskTitle.js";
 import Button from "react-bootstrap/Button";
 import { useState } from "react";
 import DeleteTaskDialog from "./DeleteTaskDialog.js";
 import { Trash } from "react-bootstrap-icons";
+import TaskDetailsModal from "./TaskDetailsModal.js";
 
 export default function Task({ taskDetails }) {
     const [deleteModalShow, setDeleteModalShow] = useState(false);
@@ -21,19 +21,13 @@ export default function Task({ taskDetails }) {
             <TaskTitle taskDetails={taskDetails}/>
           </td>
           <td>
-            <TaskDetails
-              aria-label="task details"
-              taskDetails={taskDetails}
-            />
+            <TaskDetailsModal taskDetails={taskDetails}/>
           </td>
           <td>
             {taskDetails.due_date}
           </td>
           <td>
             {taskDetails.intro_date}
-          </td>
-          <td>
-            <PreviousReviews taskId={taskDetails.id}/>
           </td>
           <td>
             <Button

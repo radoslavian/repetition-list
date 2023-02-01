@@ -122,7 +122,7 @@ describe("test TaskTitle component", () => {
     });
 });
 
-test("check if NewTaskDetails renders", () => {
+test("if NewTaskDetails renders", () => {
     render(
         <ApiProvider>
           <TasksManager>
@@ -130,15 +130,15 @@ test("check if NewTaskDetails renders", () => {
           </TasksManager>
         </ApiProvider>
     );
-    expect(screen.getByText("Description...")).toBeInTheDocument();
+    expect(screen.getByText("Add description...")).toBeInTheDocument();
     expect(screen.getByText("Multiplier:")).toBeInTheDocument();
 });
 
 import TaskDescription from "./components/TaskDescription";
 
-test("check if empty TaskDescription renders", () => {
+test("if empty TaskDescription renders", () => {
     render(<TaskDescription />);
-    const component = screen.getByText("Description...");
+    const component = screen.getByText("Add description...");
     expect(component).toBeInTheDocument();
 });
 
@@ -174,14 +174,14 @@ test("check DueDate renders", () => {
 
 import Button from "react-bootstrap/Button";
 
-test("check if NewTaskDetails renders itself and children", () => {
+test("if NewTaskDetails renders itself and children", () => {
     // how to get child component from the parent using query?
     render(
 	<NewTaskDetails testId="parent">
           <Button data-testid="child" variant="primary">Primary</Button>
 	</NewTaskDetails>
     );
-    const parentComponent = screen.getByText("Details…");
+    const parentComponent = screen.getByTestId("new-task-details");
     const childComponent = screen.getByText("Primary");
     expect(parentComponent).toBeInTheDocument();
     expect(childComponent).toBeInTheDocument();
@@ -253,13 +253,44 @@ test("if TasksGroupSwitcher renders", () => {
 });
 
 test("if TasksGroupSwitcher renders 'No review tasks...'"
+     // sprawdzić ten test
      + " header in all tabs.", async () => {
          const NUMBER_OF_TABS = 3;
          render(<TasksGroupSwitcher allTasks={[]}/>);
+
          await expect(screen.getAllByText("No review tasks on this list.")
-                      .length)
-             .toBe(NUMBER_OF_TABS);
+                      .length).toBe(NUMBER_OF_TABS);
+     });
+
+import TaskDetailsModal from "./components/TaskDetailsModal.js";
+
+test("if TaskDetailsModal shows up when clicked", async () => {
+    const taskDetails = {
+        due_date: "2022-11-19",
+        id: 1,
+        title: "test title",
+        active: true
+    };
+
+    render(
+        <AlertProvider>
+          <TasksManager>
+            <ApiProvider>
+              <TaskDetailsModal taskDetails={taskDetails}/>
+            </ApiProvider>
+          </TasksManager>
+        </AlertProvider>
+    );
+
+    const detailsButton = await screen.getByText("Details…");
+    fireEvent.click(detailsButton);
+
+    const modalTitleText = "Task Details:";
+    const modalTitle = screen.getByText(modalTitleText);
+    
+    waitFor(() => expect(modalTitleText).toBeInTheDocument());
 });
+
 
 test("if TasksGroupSwitcher renders 'No review tasks...' on two of three tabs",
      // Warning: An update to DropdownMenu inside a
@@ -285,4 +316,3 @@ test("if TasksGroupSwitcher renders 'No review tasks...' on two of three tabs",
              "No review tasks on this list.")
                 .length).toBe(NUMBER_OF_TABS);
      });
-

@@ -20,7 +20,7 @@ class Task {
                          {target: {value: "Test Task"}});
 
         // get description button:
-        this.descriptionDetailsBt = screen.getByText("Description...");
+        this.descriptionDetailsBt = screen.getByText("Add description...");
 
         // click description button:
         fireEvent.click(this.descriptionDetailsBt);
@@ -117,7 +117,7 @@ describe("adding tasks to the database", () => {
                  .toBeInTheDocument();
          });
 
-    test("failure to add new task", async () => {
+    test("failed attempt add new task", async () => {
         // has to come after all others, since
         // changes default fetchMock get route
 

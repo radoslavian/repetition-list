@@ -90,6 +90,8 @@ test("deleting item from a due list", async () => {
 });
 
 test("resetting a task", async () => {
+    // kliknięcie na Details...
+    screen.findByText("Details…").then(details => fireEvent.click(details));
     const resetMenuItem = await screen.findByText("Reset");
     expect(resetMenuItem).toBeInTheDocument();
     await act(() => fireEvent.click(resetMenuItem));
