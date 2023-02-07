@@ -1,5 +1,6 @@
 import Button from "react-bootstrap/Button";
 import { useAlerts, useApi, useTasksManager } from "../contexts";
+import Col from 'react-bootstrap/Col';
 import Task from "./Task.js";
 
 export default function DueTask(
@@ -14,7 +15,7 @@ export default function DueTask(
 
     return (
         <>
-          <td>
+          <Col className="text-end" xs={1}>
             <Button
               aria-label="tick off"
               onClick={() => apiClient
@@ -23,7 +24,7 @@ export default function DueTask(
             >
               ✓
             </Button>
-          </td>
+          </Col>
           <Task taskDetails={taskDetails} />
         </>
     );

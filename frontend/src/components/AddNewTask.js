@@ -95,7 +95,6 @@ export default function AddNewTask({ apiEndpoint }) {
             backdrop="static"
             keyboard={false}
             data-testid="add-new-task"
-            centered
           >
             <Modal.Header closeButton>
               Add new task:

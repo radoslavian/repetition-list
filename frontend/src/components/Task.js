@@ -3,6 +3,7 @@ import Button from "react-bootstrap/Button";
 import { useState } from "react";
 import DeleteTaskDialog from "./DeleteTaskDialog.js";
 import { Trash } from "react-bootstrap-icons";
+import Col from 'react-bootstrap/Col';
 import TaskDetailsModal from "./TaskDetailsModal.js";
 
 export default function Task({ taskDetails }) {
@@ -16,19 +17,19 @@ export default function Task({ taskDetails }) {
             setShow={setDeleteModalShow}
             taskDetails={taskDetails}
           />
-          <td>
+          <Col xs={6} lg={3} className="ml-5">
             <TaskTitle taskDetails={taskDetails}/>
-          </td>
-          <td>
+          </Col>
+          <Col xs={3}>
             <TaskDetailsModal taskDetails={taskDetails}/>
-          </td>
-          <td>
+          </Col>
+          <Col xs={2} className="d-none d-lg-block">
             {taskDetails.due_date}
-          </td>
-          <td>
+          </Col>
+          <Col xs={2} className="d-none d-lg-block">
             {taskDetails.intro_date}
-          </td>
-          <td>
+          </Col>
+          <Col xs={1}>
             <Button
               variant="danger"
               aria-label="delete"
@@ -36,7 +37,7 @@ export default function Task({ taskDetails }) {
             >
               <Trash/>
             </Button>
-          </td>
+          </Col>
         </>
     );
 }

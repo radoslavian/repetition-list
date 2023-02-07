@@ -3,6 +3,9 @@ import DueTask from "./DueTask.js";
 import Task from "./Task.js";
 import Tabs from "react-bootstrap/Tabs";
 import Tab from "react-bootstrap/Tab";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+import Container from 'react-bootstrap/Container';
 import { sortDate } from "../utils";
 import { useState } from "react";
 
@@ -14,11 +17,11 @@ function renderTasksHeader(header) {
         if(tasks.length > 0)
             return header;
         return (
-            <tr>
-              <td>
+            <Row>
+              <Col>
                 <h6>No review tasks on this list.</h6>
-              </td>
-            </tr>
+              </Col>
+            </Row>
         );
     };
 }
@@ -34,19 +37,33 @@ export default function TaskGroupSwitcher({ allTasks = [] }) {
     ].map(arr => arr.sort(sortDate));
 
     const dueTasksHeader = renderTasksHeader(
-        <tr>
-          <th>#</th>
-          <th colSpan="2">Task title</th>
-          <th>Due date</th>
-          <th colSpan="3">Introduction date</th>
-        </tr>
+        <Row className="border-bottom m-2">
+          <Col className="text-end" xs={1}>
+            <h5>#</h5>
+          </Col>
+          <Col xs={5}>
+            <h6>Task title</h6>
+          </Col>
+          <Col xs={2} className="d-none d-lg-block">
+            <h6>Due date</h6>
+          </Col>
+          <Col xs={2} className="d-none d-lg-block">
+            <h6>Introduction date</h6>
+          </Col>
+        </Row>
     );
     const tasksHeader = renderTasksHeader(
-        <tr>
-          <th colSpan="2">Task title</th>
-          <th>Due date</th>
-          <th colSpan="3">Introduction date</th>
-        </tr>
+        <Row className="border-bottom m-2">
+          <Col xs={5}>
+            <h6>Task title</h6>
+          </Col>
+          <Col xs={2} className="d-none d-lg-block">
+            <h6>Due date</h6>
+          </Col>
+          <Col xs={2} className="d-none d-lg-block">
+            <h6>Introduction date</h6>
+          </Col>
+        </Row>
     );
 
     return (
@@ -57,39 +74,37 @@ export default function TaskGroupSwitcher({ allTasks = [] }) {
           className="mt m-3"
         >
           <Tab eventKey="due" title="Due reviews">
-            <Table
+            <Container
+              fluid
               data-testid="due-tasks-table"
             >
-              <tbody>
-                {dueTasksHeader(dueTasks)}
-                {dueTasks.map(task => (
-                    <tr key={`a${task.id}`}>
-                      <DueTask taskDetails={task}/>
-                    </tr>))}
-              </tbody>
-            </Table>
+              {dueTasksHeader(dueTasks)}
+              {dueTasks.map(task => (
+                  <Row className="border-bottom p-1" key={`a${task.id}`}>
+                    <DueTask taskDetails={task}/>
+                  </Row>))}
+            </Container>
           </Tab>
           <Tab eventKey="upcoming" title="Upcoming reviews">
-            <Table data-testid="upcoming-tasks-list">
-              <tbody>
-                {tasksHeader(upcomingTasks)}
-                {upcomingTasks.map((task, i) => (
-                    <tr key={`b${task.id}`}>
-                      <Task taskDetails={task}/>
-                    </tr>))}
-             </tbody>
-           </Table>
+            <Container
+              fluid
+              data-testid="upcoming-tasks-list"
+            >
+              {tasksHeader(upcomingTasks)}
+              {upcomingTasks.map((task, i) => (
+                  <Row className="border-bottom p- 1" key={`b${task.id}`}>
+                    <Task taskDetails={task}/>
+                  </Row>))}
+           </Container>
           </Tab>
           <Tab eventKey="inactive" title="Inactive reviews">
-            <Table>
-              <tbody>
-                {tasksHeader(inactiveTasks)}
-                {inactiveTasks.map((task, i) => (
-                    <tr key={`c${task.id}`}>
-                      <Task taskDetails={task}/>
-                    </tr>))}
-              </tbody>
-            </Table>
+            <Container fluid>
+              {tasksHeader(inactiveTasks)}
+              {inactiveTasks.map((task, i) => (
+                  <Row className="border-bottom p-1" key={`c${task.id}`}>
+                    <Task taskDetails={task}/>
+                  </Row>))}
+            </Container>
           </Tab>
         </Tabs>
     );

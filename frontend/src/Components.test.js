@@ -160,6 +160,9 @@ test("check AddNewTask renders", () => {
                </TasksManager>
              </ApiProvider>
            </AlertProvider>);
+
+    const addNewTaskBt = screen.getByText("Add new task");
+    fireEvent.click(addNewTaskBt);
     const component = screen.getByTestId("add-new-task");
     expect(component).toBeInTheDocument();
 });

@@ -12,9 +12,16 @@ import App from "./App";
 import { _ } from "lodash";
 import { act } from "react-dom/test-utils";
 
+// helpers
+function addNewTaskBtClick() {
+    const addNewTaskBt = screen.getByText("Add new task");
+    fireEvent.click(addNewTaskBt);
+}
+
 class Task {
     constructor() {
         this.dueDate = today(2);
+        addNewTaskBtClick();
         this.titleInput = screen.getByPlaceholderText("New task title");
         fireEvent.change(this.titleInput,
                          {target: {value: "Test Task"}});
@@ -35,7 +42,7 @@ class Task {
             +'"description":"example description"'
             +`,"multiplier":1.2,"due_date":"${this.dueDate}"}`;
 
-        this.addBt = screen.getByText("+");
+        this.addBt = screen.getByText("Add & close");
     }
 }
 
@@ -92,10 +99,11 @@ describe("adding tasks to the database", () => {
     });
 
     test("attempt to add empty title to a new task", () => {
+        addNewTaskBtClick();
         const titleInput = screen.getByPlaceholderText("New task title");
         fireEvent.change(titleInput,
                          {target: {value: ""}});
-        const addBt = screen.getByText("+");
+        const addBt = screen.getByText("Add & close");
         fireEvent.click(addBt);
         expect(screen.getByText("Error: Empty title"))
             .toBeInTheDocument();
@@ -103,13 +111,15 @@ describe("adding tasks to the database", () => {
 
     test("selecting due date earlier than the date of task adding",
          async () => {
+             addNewTaskBtClick();
              const dueDateInput = screen.getByTitle("dueDate");
              let dueDateInRequest;
+
              fireEvent.change(screen.getByPlaceholderText("New task title"),
                               {target: {value: "Test Task"}});
              fireEvent.change(dueDateInput,
                               {target: {value: today(-10)}});
-             fireEvent.click(screen.getByText("+"));
+             fireEvent.click(screen.getByText("Add & close"));
 
              expect(screen.getByText(
                  "Error: Due date has to be set at least "
