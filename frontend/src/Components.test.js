@@ -267,33 +267,45 @@ test("if TasksGroupSwitcher renders 'No review tasks...'"
 
 import TaskDetailsModal from "./components/TaskDetailsModal.js";
 
-test("if TaskDetailsModal shows up when clicked", async () => {
-    const taskDetails = {
-        due_date: "2022-11-19",
-        id: 1,
-        title: "test title",
-        active: true
-    };
+describe("test TaskDetailsModal", () => {
+    beforeEach(async () => {
+        const taskDetails = {
+            due_date: "2022-11-19",
+            intro_date: "2022-10-19",
+            id: 1,
+            title: "test title",
+            active: true
+        };
 
-    render(
-        <AlertProvider>
-          <TasksManager>
-            <ApiProvider>
-              <TaskDetailsModal taskDetails={taskDetails}/>
-            </ApiProvider>
-          </TasksManager>
-        </AlertProvider>
-    );
+        render(
+            <AlertProvider>
+              <TasksManager>
+                <ApiProvider>
+                  <TaskDetailsModal taskDetails={taskDetails}/>
+                </ApiProvider>
+              </TasksManager>
+            </AlertProvider>
+        );
 
-    const detailsButton = await screen.getByText("Details…");
-    fireEvent.click(detailsButton);
+        const detailsButton = await screen.getByText("Details…");
+        fireEvent.click(detailsButton);
+    });
 
-    const modalTitleText = "Task Details:";
-    const modalTitle = screen.getByText(modalTitleText);
-    
-    waitFor(() => expect(modalTitleText).toBeInTheDocument());
+    test("if TaskDetailsModal appears", async () => {
+        const modalTitleText = "test title";
+        const modalTitle = await screen.getByText(modalTitleText);
+
+        waitFor(() => expect(modalTitleText).toBeInTheDocument());
+    });
+
+    test("if current review data is rendered", async () => {
+        const dueDate = await screen.getByText("2022-11-19");
+        const introducedOn = await screen.getByText("2022-10-19");
+
+        expect(dueDate).toBeInTheDocument();
+        expect(introducedOn).toBeInTheDocument();
+    });
 });
-
 
 test("if TasksGroupSwitcher renders 'No review tasks...' on two of three tabs",
      // Warning: An update to DropdownMenu inside a

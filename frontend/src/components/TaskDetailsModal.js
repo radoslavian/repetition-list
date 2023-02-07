@@ -28,10 +28,24 @@ export default function TaskDetailsModal(props) {
             backdrop="static"
           >
             <Modal.Header closeButton>
-              <Modal.Title>Task Details:</Modal.Title>
+              <Modal.Title>
+                Task: <i>{props.taskDetails.title}</i>
+              </Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <TaskDetails taskDetails={props.taskDetails}/>
+              <table className="table">
+                <tbody>
+                  <tr>
+                    <td>Due date:</td>
+                    <td>{props.taskDetails.due_date}</td>
+                  </tr>
+                  <tr>
+                    <td>Introduced on:</td>
+                    <td>{props.taskDetails.intro_date}</td>
+                  </tr>
+                </tbody>
+              </table>
               <PreviousReviews taskId={props.taskDetails.id}/>
             </Modal.Body>
             <Modal.Footer>
