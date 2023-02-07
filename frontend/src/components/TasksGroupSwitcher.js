@@ -36,31 +36,36 @@ export default function TaskGroupSwitcher({ allTasks = [] }) {
         allTasks.filter(task => !task.active)
     ].map(arr => arr.sort(sortDate));
 
+    const hashHeaderColWidth = 1;
+    const titleHeaderColWidth = 6;
+    const dueDateHeaderColWidth = 2;
+    const introDateHeaderColWidth = 2;
+
     const dueTasksHeader = renderTasksHeader(
         <Row className="border-bottom m-2">
-          <Col className="text-end" xs={1}>
+          <Col className="text-end" xs={hashHeaderColWidth}>
             <h5>#</h5>
           </Col>
-          <Col xs={5}>
+          <Col xs={titleHeaderColWidth}>
             <h6>Task title</h6>
           </Col>
-          <Col xs={2} className="d-none d-lg-block">
+          <Col xs={dueDateHeaderColWidth} className="d-none d-lg-block">
             <h6>Due date</h6>
           </Col>
-          <Col xs={2} className="d-none d-lg-block">
+          <Col xs={introDateHeaderColWidth} className="d-none d-lg-block">
             <h6>Introduction date</h6>
           </Col>
         </Row>
     );
     const tasksHeader = renderTasksHeader(
         <Row className="border-bottom m-2">
-          <Col xs={5}>
+          <Col xs={titleHeaderColWidth}>
             <h6>Task title</h6>
           </Col>
-          <Col xs={2} className="d-none d-lg-block">
+          <Col xs={dueDateHeaderColWidth} className="d-none d-lg-block">
             <h6>Due date</h6>
           </Col>
-          <Col xs={2} className="d-none d-lg-block">
+          <Col xs={introDateHeaderColWidth} className="d-none d-lg-block">
             <h6>Introduction date</h6>
           </Col>
         </Row>
