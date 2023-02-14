@@ -146,3 +146,52 @@ class TestApp(unittest.TestCase):
         db.session.commit()
         self.assertEqual((task.new_due_date() - date.today()),
                          (date(2022, 9, 3) - date(2022, 7, 23)) * 2)
+
+    def testTaskSerializer(self):
+        title = "task title"
+        intro_date = date(2022, 6, 15)
+        due_date = date(2022, 9, 3)
+        multiplier = 2.0
+        review_data1 = {
+            "reviewed_on": date(2022, 6, 21),
+            "multiplier": 2.0,
+            "prev_due_date": date(2022, 6, 20)
+        }
+        review_data2 = {
+            "reviewed_on": date(2022, 7, 25),
+            "multiplier": 2.0,
+            "prev_due_date": date(2022, 7, 23)
+        }
+        review_data3 = {
+            "reviewed_on": date(2022, 7, 3),
+            "multiplier": 2.0,
+            "prev_due_date": date(2022, 7, 1)
+        }
+        reviews = [
+            ReviewData(**review_data1),
+            ReviewData(**review_data2),
+            ReviewData(**review_data3),
+        ]
+
+        task = Task(title=title,
+                    intro_date=intro_date,
+                    due_date=due_date,
+                    multiplier=multiplier,
+                    reviews=reviews)
+        db.session.add(task)
+        db.session.commit()
+
+        task = Task.query.order_by().first()
+        task_serialized = task.to_dict()
+        rev_data = {
+            "id": task.reviews[0].id,
+            "task_id": task.id,
+            "reviewed_on": str(review_data1["reviewed_on"]),
+            "multiplier": review_data1["multiplier"],
+            "prev_due_date": str(review_data1["prev_due_date"])
+        }
+
+        self.assertIsInstance(task_serialized, dict)
+        self.assertGreater(len(task_serialized["reviews"]), 0)
+        self.assertEqual(title, task_serialized["title"])
+        self.assertDictEqual(rev_data, task_serialized["reviews"][0])

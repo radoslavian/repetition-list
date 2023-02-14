@@ -1,24 +1,14 @@
-import unittest
 import datetime
 from flask import url_for
 from app.fake import fake_tasks
 from app.models import Task, ReviewData
 from datetime import date, timedelta
-from app import create_app, db
+from app import db
+from app.utils.tests_helpers import ApiTester
 
 
-class TestApi(unittest.TestCase):
-    def setUp(self):
-        self.app = create_app('testing')
-        self.app_context = self.app.app_context()
-        self.app_context.push()
-        db.create_all()
-        self.client = self.app.test_client(use_cookies=True)
-
-    def tearDown(self):
-        db.session.remove()
-        db.drop_all()
-        self.app_context.pop()
+class TestV1Api(ApiTester):
+    """API Version 1 tests."""
 
     def test_add_task(self):
         """Test adding a valid task into the database."""
@@ -79,10 +69,19 @@ class TestApi(unittest.TestCase):
         db.session.add(task)
         db.session.commit()
 
+        task_update_data = {
+            "description": "John Novak. Second Title.",
+            "multiplier": 2.0
+        }
         response = self.client.patch(
-            f"/v1/tasks/{task.id}/update",
-            json={"description": "John Novak. Second Title.",
-                  "multiplier": 2.0})
+            f"/v1/task/{task.id}/update",
+            json=task_update_data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json["description"],
+                         task_update_data["description"])
+        self.assertEqual(response.json["multiplier"],
+                         task_update_data["multiplier"])
 
     def test_ticking_off(self):
         """Test 'ticking-off' reviewed tasks."""
@@ -120,7 +119,7 @@ class TestApi(unittest.TestCase):
             self.assertEqual(response.status_code, 400)
 
     def test_deleting_task(self):
-        """Test deleting tasks from the database."""
+        """Test deleting task from the database."""
 
         task = Task(title="Review book chapter",
                     intro_date=date(2022, 1, 1),
@@ -138,7 +137,7 @@ class TestApi(unittest.TestCase):
 
         self.assertEqual(self.client.delete(
             url_for("api_v1.delete_task",
-                    task_id=task.id)).status_code, 200)
+                    task_id=task.id)).status_code, 204)
         self.assertFalse(Task.query.all())
         self.assertFalse(ReviewData.query.all())
 
@@ -185,13 +184,9 @@ class TestApi(unittest.TestCase):
         self.assertTrue(all(response.json[0].get(key, None) for key in keys))
 
 
-class TestTaskUpdate(unittest.TestCase):
+class TestTaskUpdate(ApiTester):
     def setUp(self):
-        self.app = create_app('testing')
-        self.app_context = self.app.app_context()
-        self.app_context.push()
-        db.create_all()
-        self.client = self.app.test_client(use_cookies=True)
+        super().setUp()
 
         self.task_data = {"title": "Read a book again",
                           "due_date": str(
@@ -212,11 +207,6 @@ class TestTaskUpdate(unittest.TestCase):
         db.session.add(self.task)
         db.session.commit()
 
-    def tearDown(self):
-        db.session.remove()
-        db.drop_all()
-        self.app_context.pop()
-
     def test_response_wrongid(self):
         """Tests if server returns 400 response code to the wrong
         task id request.
@@ -226,19 +216,24 @@ class TestTaskUpdate(unittest.TestCase):
 
     def test_title_update(self):
         """Test successful title update status code and check if data has
-        actually changed."""
+        actually changed.
+        """
         response = self.client.patch(
             f"/v1/task/{self.task.id}/update",
             json={"title": "John Novak. Second Title."})
         self.assertEqual(response.status_code, 200)
 
+        task_data = {
+            **self.task_data, "id": self.task.id,
+            "title": "John Novak. Second Title.",
+            "reviews": []
+        }
         response = self.client.get(f"/v1/task/{self.task.id}")
-        self.assertDictEqual({**self.task_data,
-                              "title": "John Novak. Second Title."},
-                             dict(response.json))
+        self.assertDictEqual(task_data, dict(response.json))
 
     def test_empty_title(self):
-        """Test if app allows updating task with an empty title."""
+        """Test if app allows updating task with an empty title.
+        """
         response = self.client.patch(
             f"/v1/task/{self.task.id}/update",
             json={"title": ""})
@@ -251,13 +246,18 @@ class TestTaskUpdate(unittest.TestCase):
                   "multiplier": 1.5})
         response = self.client.get(f"/v1/task/{self.task.id}")
 
-        self.assertDictEqual({**self.task_data,
-                              "description": "New description.",
-                              "multiplier": 1.5},
-                             dict(response.json))
+        task_data = {
+            **self.task_data,
+            "reviews": [],
+            "id": self.task.id,
+            "description": "New description.",
+            "multiplier": 1.5
+        }
+        self.assertDictEqual(task_data, dict(response.json))
 
     def test_update_due_date_intro_date(self):
-        """Test if both intro_date and due_date update sucessfully."""
+        """Test if both intro_date and due_date update sucessfully.
+        """
         dates = {
             "intro_date": "1997-02-13",
             "due_date": "1999-01-13"
@@ -267,7 +267,9 @@ class TestTaskUpdate(unittest.TestCase):
             json=dates)
         response = self.client.get(f"/v1/task/{self.task.id}")
 
-        self.assertDictEqual({**self.task_data, **dates},
+        task_data = {**self.task_data, **dates, "reviews": [],
+                     "id": self.task.id}
+        self.assertDictEqual(task_data,
                              dict(response.json))
 
     def test_update_date_intro_date(self):
@@ -328,3 +330,33 @@ class TestTaskUpdate(unittest.TestCase):
         response = self.client.patch(
             f"/v1/task/{self.task.id+1}/update", json={"title": "new title"})
         self.assertEqual(response.status_code, 404)
+
+
+class TestV2Api(ApiTester):
+    def testPostingNewTask(self):
+        """Test adding new task"""
+        pass
+
+    def testGettingSingleTask(self):
+        """Test getting json-serialized task."""
+        pass
+
+    def testGettingTasks(self):
+        """Test obtaining collection of tasks."""
+        pass
+
+    def testUpdatingTask(self):
+        """Test patching task (updating a single field)."""
+        pass
+
+    def testTickingOff(self):
+        pass
+
+    def testDeletingTask(self):
+        pass
+
+    def testResettingTask(self):
+        pass
+
+    def testAlteringStatus(self):
+        pass

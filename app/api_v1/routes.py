@@ -1,9 +1,8 @@
-from app import db
-from datetime import datetime
-from flask import request, jsonify, abort, make_response
-from sqlalchemy.exc import InvalidRequestError
-from ..models import Task, ReviewError  # remove ReviewError
+from flask import request, jsonify, make_response
+
 from . import api_v1
+from app.utils.api_helpers import *
+from ..models import Task  # remove ReviewError
 
 
 @api_v1.errorhandler(400)
@@ -35,20 +34,7 @@ def index():
 
 @api_v1.route("/v1/add-task", methods=["POST"])
 def add_task():
-    if request.is_json:
-        if request.json.get("due_date"):
-            data = {**request.json,
-                    "due_date": datetime.strptime(
-                        request.json.get("due_date"), '%Y-%m-%d').date()}
-        else:
-            data = request.json
-        try:
-            task = Task(**data)
-            db.session.add(task)
-            db.session.commit()
-        except (ValueError, TypeError) as e:
-            db.session.rollback()
-            abort(400, str(e))
+    task = get_json_from_request(request)
 
     return make_response({"status": "Created",
                           "taskId": task.id}, 201)
@@ -56,14 +42,9 @@ def add_task():
 
 @api_v1.route("/v1/task/<int:task_id>", methods=["GET"])
 def get_task(task_id):
-    task = Task.query.filter_by(id=task_id).first_or_404()
+    task = get_task_by_id(task_id)
 
-    return make_response({"title": task.title,
-                          "active": task.active,
-                          "description": task.description,
-                          "intro_date": task.intro_date.isoformat(),
-                          "due_date": task.due_date.isoformat(),
-                          "multiplier": task.multiplier})
+    return make_response(task.to_dict())
 
 
 @api_v1.route("/v1/tasks", methods=["GET"])
@@ -71,82 +52,32 @@ def get_tasks():
     tasks = Task.query.all()
 
     return make_response(
-        jsonify([{"id": task.id,
-                  "title": task.title,
-                  "active": task.active,
-                  "description": task.description,
-                  "intro_date": task.intro_date.isoformat(),
-                  "due_date": task.due_date.isoformat(),
-                  "multiplier": task.multiplier} for task in tasks]))
+        jsonify([task.to_dict() for task in tasks]))
 
 
 @api_v1.route("/v1/task/<int:task_id>/update", methods=["PATCH"])
 def update_task(task_id):
-    if not request.is_json or not request.json:
-        abort(400, "Request should be in json format.")
-    task_query = db.session.query(Task).filter(Task.id == task_id)
-    if task_query.count() < 1:
-        abort(404, f"Task with a given id: {task_id} was not found.")
-    try:
-        # Initially I thought I would reset intro_date from the UI,
-        # it turned out later it is better to do it
-        # on the server
-        dates = {
-            k: datetime.strptime(request.json[k], '%Y-%m-%d').date()
-            for k in filter(lambda key: key in request.json,
-                            {"intro_date", "due_date"})
-        }
-        task_data = {**request.json, **dates} if dates else request.json
-
-        # remove id so it doesn't get modified in the db
-        if task_data.get("id", None):
-            del task_data["id"]
-
-        # multiplier, title have to be checked by hand - query.update doesn't
-        # run model fields validators
-        if float(task_data.get("multiplier", 1.0)) < 1.0:
-            raise ValueError("Task multiplier must be > 0.")
-        if task_data.get("title", "title") == "":
-            raise ValueError("Can not set title to an empty string.")
-        try:
-            task_query.update(task_data)
-            db.session.commit()
-        except InvalidRequestError as e:
-            db.session.rollback()
-            raise ValueError(str(e))
-    except ValueError as e:
-        abort(400, str(e))
-    return make_response({"status": "updated"}, 200)
+    task = update_task_from_request(task_id, request)
+    return make_response(task.to_dict(), 200)
 
 
 @api_v1.route("/v1/task/<int:task_id>/tick-off", methods=["PUT"])
-def tick_off(task_id):
-    task = Task.query.filter_by(id=task_id).first_or_404()
-    try:
-        task.tick_off()
-    except ReviewError:
-        abort(400)
+def tick_off_task(task_id):
+    task = tick_off_task_by_id(task_id)
     return make_response({"status": "updated",
-                          "due_date": task.due_date.isoformat(),
-    }, 200)
+                          "due_date": task.due_date.isoformat()}, 200)
 
 
 @api_v1.route("/v1/task/<int:task_id>", methods=["DELETE"])
 def delete_task(task_id):
-    task = Task.query.filter_by(id=task_id).first_or_404()
-    db.session.delete(task)
-    db.session.commit()
+    delete_task_by_id(task_id)
 
-    return make_response({
-        "taskId": task.id,
-        "status": "deleted"
-    }, 200)
+    return make_response("", 204)
 
 
 @api_v1.route("/v1/task/<int:task_id>/reset", methods=["PATCH"])
 def reset_task(task_id):
-    task = Task.query.filter_by(id=task_id).first_or_404()
-    task.reset()
+    task = reset_task_by_id(task_id)
 
     return make_response({
         "intro_date": task.intro_date.isoformat(),
@@ -170,11 +101,5 @@ def get_task_reviews(task_id):
 def change_task_status(task_id):
     """Toggle task status (active <--> inactive)."""
 
-    task = Task.query.filter_by(id=task_id).first_or_404()
-    task.active = not task.active
-    db.session.add(task)
-    db.session.commit()
-
-    return make_response(
-         {"active": task.active,
-          "status": f"task status changed to active={task.active}"}, 200)
+    task = change_task_status_by_id(task_id)
+    return make_response(task.to_dict(), 200)

@@ -2,6 +2,7 @@ from app import db
 from sqlalchemy import desc
 from sqlalchemy.orm import validates
 from datetime import date, timedelta
+from sqlalchemy_serializer import SerializerMixin
 
 
 class ReviewError(Exception):
@@ -15,7 +16,7 @@ def default_due_date():
     return date.today() + timedelta(days=Task.default_interval)
 
 
-class Task(db.Model):
+class Task(db.Model, SerializerMixin):
     __tablename__ = "tasks"
     default_interval = 3
     default_multiplier = 1.5
@@ -91,8 +92,10 @@ class Task(db.Model):
         return "<" + self.title + ">"
 
 
-class ReviewData(db.Model):
+class ReviewData(db.Model, SerializerMixin):
     __tablename__ = "review_data"
+    serialize_rules = ("-task",)
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True,
                    nullable=False)
     task_id = db.Column(db.Integer,
