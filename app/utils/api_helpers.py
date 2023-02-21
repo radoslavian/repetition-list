@@ -8,23 +8,32 @@ from werkzeug.exceptions import abort
 
 from app import db
 from app.models import Task, ReviewError
+from flask import jsonify, make_response
 
 
-def get_task_by_id(task_id):
+def get_task_by_id_or_404(task_id):
     return Task.query.filter_by(id=task_id).first_or_404()
 
 
-def get_json_from_request(request):
-    """Return new task object with data from the request."""
+def get_task_data_from_request(request):
+    """Extracts task json data from the request and returns it
+    as a dict.
+    """
 
     if not request.is_json:
         abort(400, "Expected JSON data.")
     if request.json.get("due_date"):
-        data = {**request.json,
-        "due_date": datetime.strptime(
-        request.json.get("due_date"), '%Y-%m-%d').date()}
+        data = dict({
+            **request.json,
+            "due_date": datetime.strptime(
+                request.json.get("due_date"), '%Y-%m-%d').date()
+        })
     else:
-        data = request.json
+        data = dict(request.json)
+    return data
+
+
+def add_task_from_data(data: dict):
     try:
         task = Task(**data)
         db.session.add(task)
@@ -77,7 +86,7 @@ def update_task_from_request(task_id, request):
 
 
 def tick_off_task_by_id(task_id):
-    task = Task.query.filter_by(id=task_id).first_or_404()
+    task = get_task_by_id_or_404(task_id)
     try:
         task.tick_off()
     except ReviewError:
@@ -85,23 +94,45 @@ def tick_off_task_by_id(task_id):
     return task
 
 
-def delete_task_by_id(task_id):
-    task = get_task_by_id(task_id)
+def delete_task_by_id_or_404(task_id):
+    task = get_task_by_id_or_404(task_id)
     db.session.delete(task)
     db.session.commit()
 
 
 def reset_task_by_id(task_id):
-    task = get_task_by_id(task_id)
+    task = get_task_by_id_or_404(task_id)
     task.reset()
 
     return task
 
 
 def change_task_status_by_id(task_id):
-    task = get_task_by_id(task_id)
+    task = get_task_by_id_or_404(task_id)
     task.active = not task.active
     db.session.add(task)
     db.session.commit()
 
     return task
+
+
+def add_task_from_request(request):
+    task_data = get_task_data_from_request(request)
+    task = add_task_from_data(task_data)
+
+    return task
+
+
+def jsonify_all_tasks():
+    tasks = Task.query.all()
+
+    return jsonify([task.to_dict() for task in tasks])
+
+
+def get_all_tasks_as_response():
+    return make_response(jsonify_all_tasks(), 200)
+
+
+def make_response_from_updated_task(task_id, request, status_code=200):
+    task = update_task_from_request(task_id, request)
+    return make_response(task.to_dict(), status_code)

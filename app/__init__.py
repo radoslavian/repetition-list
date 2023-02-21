@@ -13,8 +13,19 @@ def create_app(config_name="development"):
     db.init_app(app)
     app.url_map.converters['date'] = DateConverter
 
+    # registering blueprints
+    from .main import main as main_blueprint
+    app.register_blueprint(main_blueprint)
+
     from .api_v1 import api_v1 as api_v1_blueprint
-    app.register_blueprint(api_v1_blueprint)
+    app.register_blueprint(api_v1_blueprint, url_prefix="/v1")
+
+    from .api_v2 import api_v2 as api_v2_blueprint
+    app.register_blueprint(api_v2_blueprint, url_prefix="/v2")
+
+    from .error_handlers import error_handlers as error_handlers_blueprint
+    app.register_blueprint(error_handlers_blueprint)
+
 
     if "sqlite" in app.config["SQLALCHEMY_DATABASE_URI"]:
         def _fk_pragma_on_connect(dbapi_con, con_record):

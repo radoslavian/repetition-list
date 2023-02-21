@@ -4,10 +4,10 @@ from app.fake import fake_tasks
 from app.models import Task, ReviewData
 from datetime import date, timedelta
 from app import db
-from app.utils.tests_helpers import ApiTester
+from tests.tests_helpers import AppTester, add_fake_tasks, get_tasks_titles
 
 
-class TestV1Api(ApiTester):
+class TestV1Api(AppTester):
     """API Version 1 tests."""
 
     def test_add_task(self):
@@ -44,20 +44,30 @@ class TestV1Api(ApiTester):
     def test_get_tasks(self):
         """Test getting task list from the server."""
 
-        tasks = fake_tasks()
-        db.session.add_all(
-            [Task(**{**task, "intro_date":
-                     datetime.datetime.strptime(
-                         task["intro_date"],
-                         '%Y-%m-%d').date()}) for task in tasks])
-        db.session.commit()
-
+        tasks = add_fake_tasks(5)
         response = self.client.get("/v1/tasks")
-        tasks_titles = [resp_item["title"] for resp_item in response.json]
+        tasks_titles = get_tasks_titles(response)
 
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(len(tasks), len(list(response.json)))
         for task in tasks:
             self.assertTrue(task["title"] in tasks_titles)
+
+    def test_get_task(self):
+        task_data = fake_tasks(1)[0]
+        task = Task(**task_data)
+        db.session.add(task)
+        db.session.commit()
+
+        response = self.client.get(f"/v1/task/{task.id}")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.is_json)
+
+        task_title = task.title
+        task_title_from_response = response.json["title"]
+
+        self.assertEqual(task_title, task_title_from_response)
 
     def test_task_update(self):
         task = Task(**{"title": "Read a book again",
@@ -184,7 +194,7 @@ class TestV1Api(ApiTester):
         self.assertTrue(all(response.json[0].get(key, None) for key in keys))
 
 
-class TestTaskUpdate(ApiTester):
+class TestTaskUpdate(AppTester):
     def setUp(self):
         super().setUp()
 
@@ -321,6 +331,7 @@ class TestTaskUpdate(ApiTester):
         response = self.client.patch(
             f"/v1/task/{self.task.id}/update", json=data)
         self.assertEqual(response.status_code, 400)
+        self.assertTrue(response.is_json)
         self.assertEqual(response.json.get("status"),
                          "Task multiplier must be > 0.")
 
@@ -332,31 +343,3 @@ class TestTaskUpdate(ApiTester):
         self.assertEqual(response.status_code, 404)
 
 
-class TestV2Api(ApiTester):
-    def testPostingNewTask(self):
-        """Test adding new task"""
-        pass
-
-    def testGettingSingleTask(self):
-        """Test getting json-serialized task."""
-        pass
-
-    def testGettingTasks(self):
-        """Test obtaining collection of tasks."""
-        pass
-
-    def testUpdatingTask(self):
-        """Test patching task (updating a single field)."""
-        pass
-
-    def testTickingOff(self):
-        pass
-
-    def testDeletingTask(self):
-        pass
-
-    def testResettingTask(self):
-        pass
-
-    def testAlteringStatus(self):
-        pass

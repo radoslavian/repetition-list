@@ -1,1 +1,5 @@
 SQLAlchemy-serializer==1.4.1
+flask-sqlalchemy==2.5.1
+Flask==2.0.3
+python-dotenv==0.20.0
+faker==14.2.1
