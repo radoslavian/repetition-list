@@ -35,10 +35,10 @@ class Task(db.Model, SerializerMixin):
         must return the multiplier value.
         """
         # raises ValueError if value can not be converted to float
-        # for instance - it is an incombatible (non-numerical) string
+        # for instance - it is an incompatible (non-numerical) string
         value = float(value)
         if value < 1.0:
-            raise ValueError("Task multiplier must be > 0.")
+            raise ValueError("Task multiplier must be > 1.")
         return value
 
     @validates("title")

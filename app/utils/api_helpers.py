@@ -35,6 +35,7 @@ def get_task_data_from_request(request):
 
 def add_task_from_data(data: dict):
     try:
+        check_for_invalid_fields_in_added_task(data)
         task = Task(**data)
         db.session.add(task)
         db.session.commit()
@@ -42,6 +43,14 @@ def add_task_from_data(data: dict):
         db.session.rollback()
         abort(400, str(e))
     return task
+
+
+def check_for_invalid_fields_in_added_task(data):
+    allowed_fields = ("title", "description", "multiplier", "active",
+                      "due_date")
+    for key in data:
+        if key not in allowed_fields:
+            raise ValueError("Invalid field in a request.")
 
 
 def update_task_from_request(task_id, request):
@@ -90,7 +99,7 @@ def tick_off_task_by_id(task_id):
     try:
         task.tick_off()
     except ReviewError:
-        abort(400)
+        abort(400, "could not tick off a task")
     return task
 
 
@@ -136,3 +145,7 @@ def get_all_tasks_as_response():
 def make_response_from_updated_task(task_id, request, status_code=200):
     task = update_task_from_request(task_id, request)
     return make_response(task.to_dict(), status_code)
+
+
+def date_from_string(date='1997-09-17'):
+    return datetime.strptime(date, '%Y-%m-%d').date()

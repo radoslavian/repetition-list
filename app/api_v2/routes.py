@@ -30,3 +30,17 @@ def tick_off_task(task_id):
     task = tick_off_task_by_id(task_id)
 
     return make_response(task.to_dict(), 200)
+
+
+@api_v2.route("/tasks", methods=["POST"])
+def post_task():
+    task = add_task_from_request(request)
+
+    return make_response(task.to_dict(), 201)
+
+
+@api_v2.route("/tasks/<int:task_id>", methods=["GET"])
+def get_task(task_id):
+    task = get_task_by_id_or_404(task_id)
+
+    return make_response(task.to_dict(), 201)

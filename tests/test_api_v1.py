@@ -1,17 +1,23 @@
 import datetime
 from flask import url_for
-from app.fake import fake_tasks
 from app.models import Task, ReviewData
 from datetime import date, timedelta
 from app import db
-from tests.tests_helpers import AppTester, add_fake_tasks, get_tasks_titles
+from tests.tests_helpers import AppTester, add_fake_tasks, get_tasks_titles, \
+    test_for_adding_task_with_invalid_fields, test_for_add_task_with_intro_date, \
+    test_for_getting_task
 
 
 class TestV1Api(AppTester):
     """API Version 1 tests."""
+    test_get_task = test_for_getting_task("/v1/task/{}")
+    test_add_task_with_intro_date = test_for_add_task_with_intro_date(
+        "/v1/add-task")
+    test_add_task_invalid_fields = test_for_adding_task_with_invalid_fields(
+        "/v1/add-task")
 
     def test_add_task(self):
-        """Test adding a valid task into the database."""
+        """Test adding a valid task into the database through the REST API."""
 
         task_data = {"title": "Read a book again",
                      "description": "John Kowolski. Title.",
@@ -23,7 +29,7 @@ class TestV1Api(AppTester):
 
         # check if task has been created in a database
         task = Task.query.first()
-        self.assertEqual(task.id, response.json["taskId"]);
+        self.assertEqual(task.id, response.json["taskId"])
         self.assertEqual(task.title, "Read a book again")
         self.assertEqual(task.multiplier, 1.8)
 
@@ -40,34 +46,6 @@ class TestV1Api(AppTester):
         response = self.client.post("/v1/add-task",
                                     json={"occupation": "abbot"})
         self.assertEqual(response.status_code, 400)
-
-    def test_get_tasks(self):
-        """Test getting task list from the server."""
-
-        tasks = add_fake_tasks(5)
-        response = self.client.get("/v1/tasks")
-        tasks_titles = get_tasks_titles(response)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(tasks), len(list(response.json)))
-        for task in tasks:
-            self.assertTrue(task["title"] in tasks_titles)
-
-    def test_get_task(self):
-        task_data = fake_tasks(1)[0]
-        task = Task(**task_data)
-        db.session.add(task)
-        db.session.commit()
-
-        response = self.client.get(f"/v1/task/{task.id}")
-
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.is_json)
-
-        task_title = task.title
-        task_title_from_response = response.json["title"]
-
-        self.assertEqual(task_title, task_title_from_response)
 
     def test_task_update(self):
         task = Task(**{"title": "Read a book again",
@@ -341,5 +319,3 @@ class TestTaskUpdate(AppTester):
         response = self.client.patch(
             f"/v1/task/{self.task.id+1}/update", json={"title": "new title"})
         self.assertEqual(response.status_code, 404)
-
-

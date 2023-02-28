@@ -19,7 +19,7 @@ def add_task():
 def get_task(task_id):
     task = get_task_by_id_or_404(task_id)
 
-    return make_response(task.to_dict(), 200)
+    return make_response(task.to_dict(), 201)
 
 
 @api_v1.route("/tasks", methods=["GET"])
