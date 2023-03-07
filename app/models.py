@@ -54,6 +54,9 @@ class Task(db.Model, SerializerMixin):
         self.intro_date = date.today()
         self.due_date = default_due_date()
 
+        self.save()
+
+    def save(self):
         db.session.add(self)
         db.session.commit()
 
@@ -84,9 +87,7 @@ class Task(db.Model, SerializerMixin):
                                        reviewed_on=date.today(),
                                        multiplier=self.multiplier))
         self.due_date = due_date
-
-        db.session.add(self)
-        db.session.commit()
+        self.save()
 
     def __repr__(self):
         return "<" + self.title + ">"

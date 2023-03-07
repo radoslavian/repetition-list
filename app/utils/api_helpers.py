@@ -134,7 +134,6 @@ def add_task_from_request(request):
 
 def jsonify_all_tasks():
     tasks = Task.query.all()
-
     return jsonify([task.to_dict() for task in tasks])
 
 

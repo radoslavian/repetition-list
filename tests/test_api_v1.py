@@ -1,11 +1,13 @@
 import datetime
+
 from flask import url_for
-from app.models import Task, ReviewData
-from datetime import date, timedelta
+
+from app.models import Task
 from app import db
-from tests.tests_helpers import AppTester, add_fake_tasks, get_tasks_titles, \
-    test_for_adding_task_with_invalid_fields, test_for_add_task_with_intro_date, \
-    test_for_getting_task
+from tests.tests_helpers import (
+    AppTester, test_for_adding_task_with_invalid_fields,
+    test_for_add_task_with_intro_date, test_for_getting_task,
+    test_for_deleting_task, example_tasks, test_for_resetting_task)
 
 
 class TestV1Api(AppTester):
@@ -15,6 +17,9 @@ class TestV1Api(AppTester):
         "/v1/add-task")
     test_add_task_invalid_fields = test_for_adding_task_with_invalid_fields(
         "/v1/add-task")
+    test_delete_task = test_for_deleting_task("/v1/task/{}")
+    test_resetting_task = test_for_resetting_task("/v1/task/{}/reset",
+                                                  "patch")
 
     def test_add_task(self):
         """Test adding a valid task into the database through the REST API."""
@@ -48,14 +53,7 @@ class TestV1Api(AppTester):
         self.assertEqual(response.status_code, 400)
 
     def test_task_update(self):
-        task = Task(**{"title": "Read a book again",
-                       "due_date": datetime.datetime(2022, 2, 22),
-                       "intro_date": datetime.datetime(2021, 2, 22),
-                       "multiplier": 1.8,
-                       "active": True,
-                       "description": "Original task."})
-        db.session.add(task)
-        db.session.commit()
+        task, *_ = example_tasks()
 
         task_update_data = {
             "description": "John Novak. Second Title.",
@@ -74,31 +72,10 @@ class TestV1Api(AppTester):
     def test_ticking_off(self):
         """Test 'ticking-off' reviewed tasks."""
 
-        due_task_past = Task(**{
-            "title": "task 1",
-            "description": "Description 1",
-            "intro_date": date(1999, 1, 1),
-            "due_date": date(2000, 2, 2)})
-        todays_task = Task(**{
-            "title": "task 2",
-            "description": "Description 2",
-            "intro_date": datetime.date.today() - datetime.timedelta(days=3),
-            "due_date": datetime.date.today()})
-        future_task = Task(**{
-            "title": "task 3",
-            "description": "Description 3"})
-        inactive_task = Task(**{
-            "title": "task 1",
-            "description": "Description 1",
-            "active": False,
-            "intro_date": datetime.date.today() - datetime.timedelta(days=3),
-            "due_date": datetime.date.today()})
+        (due_task_past, future_task,
+         inactive_task, today_task) = example_tasks()
 
-        db.session.add_all([due_task_past, todays_task,
-                            future_task, inactive_task])
-        db.session.commit()
-
-        for task in due_task_past, todays_task:
+        for task in due_task_past, today_task:
             response = self.client.put(f"/v1/task/{task.id}/tick-off")
             self.assertEqual(response.status_code, 200)
 
@@ -106,36 +83,12 @@ class TestV1Api(AppTester):
             response = self.client.put(f"/v1/task/{task.id}/tick-off")
             self.assertEqual(response.status_code, 400)
 
-    def test_deleting_task(self):
-        """Test deleting task from the database."""
-
-        task = Task(title="Review book chapter",
-                    intro_date=date(2022, 1, 1),
-                    description="John Kowolski. Title. Chapter 1.",
-                    reviews=[
-                        ReviewData(reviewed_on=date(2022, 3, 17),
-                                   prev_due_date=date(2022, 9, 1),
-                                   multiplier=1.5),
-                        ReviewData(reviewed_on=date(2022, 1, 31),
-                                   prev_due_date=date(2022, 3, 17),
-                                   multiplier=1.5)
-                    ])
-        db.session.add(task)
-        db.session.commit()
-
-        self.assertEqual(self.client.delete(
-            url_for("api_v1.delete_task",
-                    task_id=task.id)).status_code, 204)
-        self.assertFalse(Task.query.all())
-        self.assertFalse(ReviewData.query.all())
-
     def test_change_task_status(self):
         """Test removing/reintroducing task into queue."""
         task = Task(title="Review book chapter",
                     active=True,
                     description="John Kowolski. Title. Chapter 1.")
-        db.session.add(task)
-        db.session.commit()
+        task.save()
 
         self.assertEqual(self.client.patch(
             url_for("api_v1.change_task_status",
@@ -146,22 +99,10 @@ class TestV1Api(AppTester):
                                   task_id=task.id))
         self.assertTrue(Task.query.first().active)
 
-    def test_reset_task(self):
-        self.test_ticking_off()
-        task = Task.query.all()[0]
 
-        self.assertEqual(len(task.reviews), 1)
-        self.assertEqual(self.client.patch(
-            url_for("api_v1.reset_task",
-                    task_id=task.id)).status_code, 200)
-        self.assertEqual(len(task.reviews), 0)
-        self.assertEqual(task.intro_date, date.today())
-        self.assertEqual(task.due_date, date.today()
-                         + timedelta(days=Task.default_interval))
-
-    def test_getting_reviewdata(self):
-        self.test_ticking_off()
-        task = Task.query.all()[0]
+    def test_getting_review_data(self):
+        task, *_ = example_tasks()
+        task.tick_off()
         response = self.client.get(f"/v1/task/{task.id}/reviews")
         keys = ["multiplier", "prev_due_date", "reviewed_on"]
 
@@ -192,8 +133,7 @@ class TestTaskUpdate(AppTester):
                      "description": "Original task."}
 
         self.task = Task(**task_data)
-        db.session.add(self.task)
-        db.session.commit()
+        self.task.save()
 
     def test_response_wrongid(self):
         """Tests if server returns 400 response code to the wrong
@@ -244,7 +184,7 @@ class TestTaskUpdate(AppTester):
         self.assertDictEqual(task_data, dict(response.json))
 
     def test_update_due_date_intro_date(self):
-        """Test if both intro_date and due_date update sucessfully.
+        """Test if both intro_date and due_date update successfully.
         """
         dates = {
             "intro_date": "1997-02-13",
@@ -261,7 +201,7 @@ class TestTaskUpdate(AppTester):
                              dict(response.json))
 
     def test_update_date_intro_date(self):
-        """Test if intro_date updates sucessfully."""
+        """Test if intro_date updates successfully."""
         response = self.client.patch(
             f"/v1/task/{self.task.id}/update",
             json={"intro_date": "1997-02-13"})
@@ -269,7 +209,7 @@ class TestTaskUpdate(AppTester):
         self.assertEqual(response.status_code, 200)
 
     def test_update_date_due_date(self):
-        """Test if due_date updates sucessfully."""
+        """Test if due_date updates successfully."""
         response = self.client.patch(
             f"/v1/task/{self.task.id}/update",
             json={"due_date": "1997-02-13"})
@@ -319,3 +259,5 @@ class TestTaskUpdate(AppTester):
         response = self.client.patch(
             f"/v1/task/{self.task.id+1}/update", json={"title": "new title"})
         self.assertEqual(response.status_code, 404)
+
+

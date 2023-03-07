@@ -1,14 +1,3 @@
-# POST /v1/add-task -> POST /v2/tasks
-# GET /v1/task/int:task_id -> GET /v2/tasks/int:task_id
-# DELETE /v1/task/int:task_id -> DELETE /v2/tasks/int:task_id
-# PATCH /v1/task/int:task_id/reset -> POST /v2/tasks/int:task_id/reset
-# GET /v1/task/int:task_id/reviews -> removed (serialize reviews into task data)
-# PATCH /v1/task/int:task_id/status -> POST /v2/tasks/int:task_id/status
-#
-# NEW: PUT /v2/tasks/task_id:int
-# for updating whole task data (is this necessary? I want be updating
-# ReviewData anyway).
-
 from flask import request, make_response
 
 from . import api_v2
@@ -28,19 +17,51 @@ def update_task(task_id):
 @api_v2.route("/tasks/<int:task_id>/tick-off", methods=["POST"])
 def tick_off_task(task_id):
     task = tick_off_task_by_id(task_id)
-
     return make_response(task.to_dict(), 200)
 
 
 @api_v2.route("/tasks", methods=["POST"])
 def post_task():
     task = add_task_from_request(request)
-
     return make_response(task.to_dict(), 201)
 
 
 @api_v2.route("/tasks/<int:task_id>", methods=["GET"])
 def get_task(task_id):
     task = get_task_by_id_or_404(task_id)
-
     return make_response(task.to_dict(), 201)
+
+
+@api_v2.route("/tasks/<int:task_id>", methods=["DELETE"])
+def delete_task(task_id):
+    delete_task_by_id_or_404(task_id)
+    return make_response("", 204)
+
+
+@api_v2.route("/tasks/<int:task_id>/reset", methods=["POST"])
+def reset_task(task_id):
+    task = reset_task_by_id(task_id)
+    return make_response(task.to_dict(), 200)
+
+
+@api_v2.route("/tasks/<int:task_id>/<string:status>", methods=["POST"])
+def set_status(task_id, status):
+    status_bool = {
+        "active": True,
+        "inactive": False
+    }.get(status, None)
+
+    if status_bool is None:
+        abort(400)
+
+    def check_status(task_object):
+        if task_object.active == status_bool:
+            return "", 204
+        task_object.active = status_bool
+        task_object.save()
+
+        return task_object.to_dict()
+
+    task = get_task_by_id_or_404(task_id)
+
+    return make_response(check_status(task))

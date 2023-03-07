@@ -35,7 +35,6 @@ def update_task(task_id):
 @api_v1.route("/task/<int:task_id>/tick-off", methods=["PUT"])
 def tick_off_task(task_id):
     task = tick_off_task_by_id(task_id)
-
     return make_response({"status": "updated",
                           "due_date": task.due_date.isoformat()}, 200)
 
@@ -43,14 +42,12 @@ def tick_off_task(task_id):
 @api_v1.route("/task/<int:task_id>", methods=["DELETE"])
 def delete_task(task_id):
     delete_task_by_id_or_404(task_id)
-
     return make_response("", 204)
 
 
 @api_v1.route("/task/<int:task_id>/reset", methods=["PATCH"])
 def reset_task(task_id):
     task = reset_task_by_id(task_id)
-
     return make_response({
         "intro_date": task.intro_date.isoformat(),
         "due_date": task.due_date.isoformat(),
@@ -61,7 +58,6 @@ def reset_task(task_id):
 @api_v1.route("/task/<int:task_id>/reviews", methods=["GET"])
 def get_task_reviews(task_id):
     task = Task.query.get_or_404(task_id)
-
     return make_response(jsonify([{
         "reviewed_on": data_item.reviewed_on,
         "prev_due_date": data_item.prev_due_date,

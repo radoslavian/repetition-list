@@ -4,8 +4,70 @@ from app import db
 from app.models import Task
 from app.utils.fake import fake_task_for_api
 from tests.tests_helpers import AppTester, route_ending, add_fake_tasks, \
-    test_for_adding_task_with_invalid_fields, test_for_getting_task
+    test_for_adding_task_with_invalid_fields, test_for_getting_task, \
+    test_for_deleting_task, test_for_resetting_task, example_tasks
 from flask import url_for
+
+
+class TestChangingTaskStatus(AppTester):
+    def setUp(self):
+        super().setUp()
+        self.task, *_ = example_tasks()
+
+    def test_task_inactive_to_inactive(self):
+        self.make_task_inactive()
+        self.assertFalse(self.task.active)
+        response = self.client.post(f"/v2/tasks/{self.task.id}/inactive")
+        self.assertEqual(response.status_code, 204)
+        # is the task still inactive?
+        self.assertFalse(self.task.active)
+
+    def test_task_active_to_active(self):
+        self.assertTrue(self.task.active)
+        response = self.client.post(f"/v2/tasks/{self.task.id}/active")
+        self.assertEqual(response.status_code, 204)
+        # is the task still active?
+        self.assertTrue(self.task.active)
+
+    def test_task_inactive_to_active(self):
+        # shall return 200 + task object
+        self.make_task_inactive()
+        self.assertFalse(self.task.active)
+        response = self.client.post(f"/v2/tasks/{self.task.id}/active")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json["active"])
+        self.assertTrue(self.task.active)
+
+    def test_response_carries_data(self):
+        self.assertTrue(self.task.active)
+        response = self.client.post(f"/v2/tasks/{self.task.id}/inactive")
+        self.assertTrue(response.json)
+        self.assertEqual(response.json["title"], self.task.title)
+
+    def test_task_active_to_inactive(self):
+        # shall return 200 + task object
+        self.assertTrue(self.task.active)
+        response = self.client.post(f"/v2/tasks/{self.task.id}/inactive")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.json["active"])
+        self.assertFalse(self.task.active)
+
+    def test_malformed_url(self):
+        response = self.client.post(f"/v2/tasks/{self.task.id}/badRequest")
+        self.assertEqual(response.status_code, 400)
+
+    def test_task_not_found(self):
+        irrational_task_number = 100
+        response = self.client.post(
+            f"/v2/tasks/{irrational_task_number}/active")
+        self.assertEqual(response.status_code, 404)
+
+    def make_task_inactive(self):
+        self.task.active = False
+        db.session.add(self.task)
+        db.session.commit()
 
 
 class TestV2Api(AppTester):
@@ -13,17 +75,11 @@ class TestV2Api(AppTester):
     test_get_task = test_for_getting_task("/v2/tasks/{}")
     test_add_task_invalid_fields = test_for_adding_task_with_invalid_fields(
         "/v2/tasks")
+    test_deleting_task = test_for_deleting_task("/v2/tasks/{}")
+    test_getting_task = test_for_getting_task("/v2/tasks/{}")
+    test_resetting_task = test_for_resetting_task(
+        "/v2/tasks/{}/reset", "post")
 
-    def test_getting_single_task(self):
-        """Test getting json-serialized task."""
-    def test_deleting_task(self):
-        pass
-
-    def test_resetting_task(self):
-        pass
-
-    def test_altering_status(self):
-        pass
 
     def test_posting_new_task(self):
         """Test adding new task"""
@@ -92,4 +148,3 @@ class TestV2Api(AppTester):
                          route_ending(expected_route, obtained_route))
         self.assertEqual(response_ticked_off_task.json["title"],
                          task.title)
-
