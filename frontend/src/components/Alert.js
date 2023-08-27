@@ -29,6 +29,7 @@ export function Alert({ message, remove = fallbackRemove, variant }) {
 }
 
 export function useAlert() {
+    // what would happen if I had used here useRef instead of useState?
     const [alerts, setAlerts] = useState([]);
     const remove = index => setAlerts(
         alerts.filter((v, i) => i !== index));
