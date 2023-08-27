@@ -9,7 +9,7 @@ The repetition/review task can be:
 * Reset (data on previous repetitions is removed and a new review date is set)
 * Moved into inactive tab (so that it won't appear as "due" or "upcoming")
 * "Ticked-off" - marked as reviewed in the "due" tab: it is then assigned a new repetition date and is moved into the "Upcoming" tab.
-* Deleted
+* Deleted  
 Before developing the app, I was using the following strategy:
 1. Setting up an event in Google Calendar (for instance "Read notes on Python in ...")
 2. Configuring it as a recurring event ("recur every ... days/weeks)
