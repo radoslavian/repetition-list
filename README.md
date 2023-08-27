@@ -3,14 +3,16 @@ This is a rather simplistic, Flask and React based app for planning reviews of l
 The app is similar to (an ordinary) task-list divided into three columns:
 * Due reviews - reviews that are due or scheduled for a given day
 * Upcoming reviews
-* Inactive reviews
-After adding a task, it can be:
+* Inactive reviews  
+The repetition/review task can be:
 * Updated (title, description)
 * Reset (data on previous repetitions is removed and a new review date is set)
-* Moved into inactive tab (so that it won't appear as "due" or "upcoming")  
+* Moved into inactive tab (so that it won't appear as "due" or "upcoming")
+* "Ticked-off" - marked as reviewed in the "due" tab: it is then assigned a new repetition date and is moved into the "Upcoming" tab.
+* Deleted
 Before developing the app, I was using the following strategy:
-1. Set up an event in Google Calendar (for instance "Read notes on Python in ...")
-2. Configured it as a recurring event ("recur every ... days/weeks)
+1. Setting up an event in Google Calendar (for instance "Read notes on Python in ...")
+2. Configuring it as a recurring event ("recur every ... days/weeks)
 3. Efter each review, I had to manually multiply the interval by a given multiplier.  
 That solution was cumbersome and prone to mistakes, so I took the opportunity to practice React and creating Rest API at the same time. The result is rather very imperfect (at best) and unfit to become a real web application - this was my first attempt at both: using React and REST API. But it does it's job right.
 ## How do I use it?
