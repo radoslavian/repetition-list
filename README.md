@@ -7,7 +7,7 @@ The app is similar to a (ordinary) task-list with three columns:
 After adding a task, it can be:
 * Updated (title, description)
 * Reset (data on previous repetitions is removed and a new review date is set)
-* Moved into inactive tab (so that it won't appear as "due" or "upcoming")
+* Moved into inactive tab (so that it won't appear as "due" or "upcoming")  
 Before developing the app, I was using the following strategy:
 1. Set up an event in Google Calendar (for instance "Read notes on Python in ...")
 2. Configured it as a recurring event ("recur every ... days/weeks)
